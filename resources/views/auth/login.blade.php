@@ -483,6 +483,13 @@
     </div>
 
     <div class="toast-container">
+        @if (session('error'))
+            <div class="toast" id="toast-error" style="border-left-color:#f44336; border-color:rgba(244,67,54,0.8);">
+                {{ session('error') }}
+                <div class="toast-progress" style="background:linear-gradient(90deg,#f44336,#e57373);"></div>
+            </div>
+        @endif
+
         @if (session('warning'))
             <div class="toast toast-warning" id="toast-warning">
                 {{ session('warning') }}
@@ -519,6 +526,11 @@
 
             if (toastWarning) {
                 setTimeout(function () { hideToast(toastWarning); }, 5000);
+            }
+
+            var toastError = document.getElementById('toast-error');
+            if (toastError) {
+                setTimeout(function () { hideToast(toastError); }, 5000);
             }
         });
     </script>

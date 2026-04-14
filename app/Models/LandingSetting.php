@@ -14,11 +14,11 @@ class LandingSetting extends Model
         'theme_color',
         'headline',
         'subheadline',
-        'plans',
         'logo_path',
-    ];
-
-    protected $casts = [
-        'plans' => 'array',
+        'dashboard_title',
+        'dashboard_tagline',
+        'primary_color',
+        'dashboard_logo',
+        'favicon',
     ];
 }

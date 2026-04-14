@@ -1,39 +1,23 @@
 @extends('admin.layout')
-@section('title', 'Account Settings')
+@section('title', 'Admin Settings')
 
 @section('content')
 <div class="adm-page-header">
     <div>
-        <div class="adm-page-title">Account Settings</div>
-        <div class="adm-page-subtitle">Update your admin profile and password.</div>
+        <div class="adm-page-title">Admin Settings</div>
+        <div class="adm-page-subtitle">Configure dashboard appearance and system settings.</div>
     </div>
 </div>
 
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
 
-    {{-- Profile Info --}}
+    {{-- Dashboard Branding --}}
     <div class="adm-card">
         <h3 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.07);">
-            👤 Profile Information
+            🎨 Dashboard Appearance
         </h3>
 
-        {{-- Avatar --}}
-        <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
-            <div style="width:72px; height:72px; border-radius:50%; overflow:hidden; border:2px solid rgba(255,82,82,0.4); flex-shrink:0; background:linear-gradient(135deg,#ff6b6b,#d50000); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700; color:#fff;">
-                @if(auth()->user()->profile_image)
-                    <img src="{{ asset('storage/' . auth()->user()->profile_image) }}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">
-                @else
-                    {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}
-                @endif
-            </div>
-            <div>
-                <div style="font-weight:600; font-size:15px;">{{ auth()->user()->full_name }}</div>
-                <div style="font-size:12px; color:rgba(255,255,255,0.45); margin-top:3px;">{{ auth()->user()->email }}</div>
-                <div style="font-size:11px; color:#ff6b6b; margin-top:4px;">Administrator</div>
-            </div>
-        </div>
-
-        @if($errors->profileBag ?? $errors->any())
+        @if($errors->any())
         <div style="background:rgba(255,82,82,0.1); border:1px solid rgba(255,82,82,0.3); border-radius:10px; padding:12px 16px; margin-bottom:18px; color:#ff8a80; font-size:13px;">
             @foreach($errors->all() as $error)<div>• {{ $error }}</div>@endforeach
         </div>
@@ -42,51 +26,53 @@
         <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
-            <div class="adm-form-row">
-                <div class="adm-form-group">
-                    <label>First Name</label>
-                    <input type="text" name="first_name" value="{{ old('first_name', auth()->user()->first_name) }}" required>
-                </div>
-                <div class="adm-form-group">
-                    <label>Last Name</label>
-                    <input type="text" name="last_name" value="{{ old('last_name', auth()->user()->last_name) }}" required>
-                </div>
+            <div class="adm-form-group">
+                <label>Dashboard Title</label>
+                <input type="text" name="dashboard_title" value="{{ old('dashboard_title', $settings->dashboard_title ?? 'ISP Billing') }}" placeholder="e.g. ISP Billing">
+                @error('dashboard_title')<div class="adm-form-error">{{ $message }}</div>@enderror
             </div>
 
             <div class="adm-form-group">
-                <label>Middle Name</label>
-                <input type="text" name="middle_name" value="{{ old('middle_name', auth()->user()->middle_name) }}">
-            </div>
-
-            <div class="adm-form-group">
-                <label>Email</label>
-                <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" required>
-            </div>
-
-            <div class="adm-form-row">
-                <div class="adm-form-group">
-                    <label>Phone Number</label>
-                    <input type="text" name="phone_number" value="{{ old('phone_number', auth()->user()->phone_number) }}">
+                <label>Primary Color</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="color" name="primary_color" value="{{ old('primary_color', $settings->primary_color ?? '#ff5252') }}" 
+                           style="height:46px; padding:4px 8px; cursor:pointer; border-radius:8px; border:1px solid rgba(255,255,255,0.1); width:80px;">
+                    <span style="font-size:12px; color:rgba(255,255,255,0.5);">{{ old('primary_color', $settings->primary_color ?? '#ff5252') }}</span>
                 </div>
-                <div class="adm-form-group">
-                    <label>Age</label>
-                    <input type="number" name="age" value="{{ old('age', auth()->user()->age) }}" min="1" max="120">
-                </div>
+                @error('primary_color')<div class="adm-form-error">{{ $message }}</div>@enderror
             </div>
 
             <div class="adm-form-group">
-                <label>Address</label>
-                <textarea name="address" rows="2">{{ old('address', auth()->user()->address) }}</textarea>
-            </div>
-
-            <div class="adm-form-group">
-                <label>Profile Picture</label>
-                <input type="file" name="profile_image" accept="image/*"
+                <label>Dashboard Logo</label>
+                <input type="file" name="dashboard_logo" accept="image/*"
                        style="padding:10px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; background:rgba(255,255,255,0.04); color:#fff; width:100%; font-size:13px;">
+                @error('dashboard_logo')<div class="adm-form-error">{{ $message }}</div>@enderror
+                @if($settings && $settings->dashboard_logo)
+                <div style="margin-top:12px; display:flex; align-items:center; gap:12px;">
+                    <img src="{{ asset('storage/' . $settings->dashboard_logo) }}" alt="Dashboard logo"
+                         style="width:50px; height:50px; border-radius:8px; object-fit:contain; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.02);">
+                    <span style="font-size:12px; color:rgba(255,255,255,0.5);">Current logo</span>
+                </div>
+                @endif
+            </div>
+
+            <div class="adm-form-group">
+                <label>Favicon (Icon in Browser Tab)</label>
+                <input type="file" name="favicon" accept="image/*"
+                       style="padding:10px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; background:rgba(255,255,255,0.04); color:#fff; width:100%; font-size:13px;">
+                <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:6px;">Recommended: 32x32 PNG or ICO</div>
+                @error('favicon')<div class="adm-form-error">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="adm-form-group">
+                <label>Dashboard Tagline</label>
+                <textarea name="dashboard_tagline" rows="2" placeholder="e.g. Manage your ISP services"
+                          style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#fff; font-size:13px; font-family:inherit; resize:vertical;">{{ old('dashboard_tagline', $settings->dashboard_tagline ?? '') }}</textarea>
+                @error('dashboard_tagline')<div class="adm-form-error">{{ $message }}</div>@enderror
             </div>
 
             <div class="adm-form-actions">
-                <button type="submit" class="btn-primary">💾 Save Profile</button>
+                <button type="submit" class="btn-primary">💾 Save Appearance</button>
             </div>
         </form>
     </div>
@@ -102,19 +88,22 @@
 
             <div class="adm-form-group">
                 <label>Current Password</label>
-                <input type="password" name="current_password" required autocomplete="current-password">
+                <input type="password" name="current_password" required autocomplete="current-password"
+                       style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#fff; font-size:13px; font-family:inherit;">
                 @error('current_password')<div class="adm-form-error">{{ $message }}</div>@enderror
             </div>
 
             <div class="adm-form-group">
                 <label>New Password</label>
-                <input type="password" name="password" required autocomplete="new-password">
+                <input type="password" name="password" required autocomplete="new-password"
+                       style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#fff; font-size:13px; font-family:inherit;">
                 @error('password')<div class="adm-form-error">{{ $message }}</div>@enderror
             </div>
 
             <div class="adm-form-group">
                 <label>Confirm New Password</label>
-                <input type="password" name="password_confirmation" required autocomplete="new-password">
+                <input type="password" name="password_confirmation" required autocomplete="new-password"
+                       style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#fff; font-size:13px; font-family:inherit;">
             </div>
 
             <div class="adm-form-actions">
@@ -123,5 +112,14 @@
         </form>
     </div>
 
+</div>
+
+<div class="adm-card" style="margin-top:20px;">
+    <h3 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.07);">
+        ℹ️ Profile Settings
+    </h3>
+    <p style="font-size:13px; color:rgba(255,255,255,0.7); margin:0;">
+        To edit your personal profile information (name, email, phone, profile picture), please visit your <a href="{{ route('profile.edit') }}" style="color:#ff6b6b; text-decoration:none; border-bottom:1px solid rgba(255,107,107,0.3);">Admin Profile</a> page.
+    </p>
 </div>
 @endsection

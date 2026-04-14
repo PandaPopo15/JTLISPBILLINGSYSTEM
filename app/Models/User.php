@@ -23,8 +23,8 @@ class User extends Authenticatable
         'address', 'latitude', 'longitude',
         'age', 'plan_interest', 'mikrotik_id',
         'pppoe_username', 'status',
-        'password', 'is_admin',
-'profile_image',
+        'password', 'is_admin', 'email_verified_at',
+        'profile_image',
         'due_date',
         'installation_date',
     ];
@@ -89,6 +89,11 @@ class User extends Authenticatable
     public function mikrotik()
     {
         return $this->belongsTo(Mikrotik::class, 'mikrotik_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }
 

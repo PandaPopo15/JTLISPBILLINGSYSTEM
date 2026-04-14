@@ -47,10 +47,10 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.dashboard')->with('welcome', $user->first_name);
             }
 
-            return redirect()->intended('/dashboard');
+            return redirect()->intended('/dashboard')->with('welcome', $user->first_name);
         }
 
         return back()

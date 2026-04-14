@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MikrotikController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\PlanController;
 
 Route::get('/', [LandingController::class, 'index']);
 
@@ -33,6 +34,11 @@ Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']
 // Dashboard routes
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+Route::get('/admin/sales', [DashboardController::class, 'sales'])->name('admin.sales');
+Route::post('/admin/sales/store', [DashboardController::class, 'storeSale'])->name('admin.sales.store');
+Route::post('/admin/sales/{sale}/delete', [DashboardController::class, 'deleteSale'])->name('admin.sales.delete');
+Route::post('/admin/expenses/store', [DashboardController::class, 'storeExpense'])->name('admin.expenses.store');
+Route::post('/admin/expenses/{expense}/delete', [DashboardController::class, 'deleteExpense'])->name('admin.expenses.delete');
 
 // Landing page admin edit
 Route::middleware('auth')->group(function () {
@@ -59,6 +65,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/clients/{client}/activate', [DashboardController::class, 'activateClient'])->name('admin.clients.activate');
     Route::post('/admin/clients/{client}/verify', [DashboardController::class, 'verifyClient'])->name('admin.clients.verify');
     Route::post('/admin/clients/{client}/delete', [DashboardController::class, 'deleteClient'])->name('admin.clients.delete');
+    Route::post('/admin/clients/{client}/mark-paid', [DashboardController::class, 'markPaymentPaid'])->name('admin.mark-payment-paid');
+    Route::post('/admin/payments/{payment}/mark-paid', [DashboardController::class, 'markPaymentPaidById'])->name('admin.payment.mark-paid');
+    Route::get('/admin/plans', [PlanController::class, 'index'])->name('admin.plans');
+    Route::get('/admin/plans/create', [PlanController::class, 'create'])->name('admin.plans.create');
+    Route::post('/admin/plans', [PlanController::class, 'store'])->name('admin.plans.store');
+    Route::get('/admin/plans/{plan}/edit', [PlanController::class, 'edit'])->name('admin.plans.edit');
+    Route::post('/admin/plans/{plan}/update', [PlanController::class, 'update'])->name('admin.plans.update');
+    Route::post('/admin/plans/{plan}/delete', [PlanController::class, 'destroy'])->name('admin.plans.delete');
     Route::get('/admin/landing', [LandingController::class, 'edit'])->name('admin.landing');
     Route::post('/admin/landing/update', [LandingController::class, 'update'])->name('admin.landing.update');
     Route::get('/profile/edit', [DashboardController::class, 'editProfile'])->name('profile.edit');

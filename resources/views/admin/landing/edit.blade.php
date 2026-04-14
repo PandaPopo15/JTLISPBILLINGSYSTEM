@@ -47,6 +47,10 @@
             <label>Logo Image</label>
             <input type="file" name="logo" accept="image/*"
                    style="padding:10px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; background:rgba(255,255,255,0.04); color:#fff; width:100%;">
+            <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-top:8px; line-height:1.6;">
+                📌 Accepted formats: JPG, PNG, SVG, GIF (max 2MB)<br>
+                📏 Recommended size: 200x60px or similar aspect ratio for best display
+            </div>
             @error('logo')<div class="adm-form-error">{{ $message }}</div>@enderror
             @if($settings->logo_path)
             <div style="margin-top:12px; display:flex; align-items:center; gap:12px;">
@@ -59,7 +63,7 @@
     </div>
 
     {{-- Hero Section --}}
-    <div class="adm-card" style="margin-bottom: 20px;">
+    <div class="adm-card" style="margin-bottom: 24px;">
         <h3 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.07);">
             🎯 Hero Section
         </h3>
@@ -77,43 +81,9 @@
         </div>
     </div>
 
-    {{-- Plans --}}
-    <div class="adm-card" style="margin-bottom: 24px;">
-        <h3 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:8px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.07);">
-            📋 Plans (JSON)
-        </h3>
-        <p style="font-size:13px; color:rgba(255,255,255,0.45); margin-bottom:16px;">
-            Each plan needs: <code style="background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px;">name</code>,
-            <code style="background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px;">price</code>,
-            <code style="background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px;">description</code>,
-            <code style="background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px;">features</code> (array of strings).
-        </p>
-        <div class="adm-form-group">
-            <textarea name="plans" rows="18" required
-                      style="font-family: 'Courier New', monospace; font-size: 13px; line-height:1.6;">{{ old('plans', json_encode($settings->plans, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) }}</textarea>
-            @error('plans')<div class="adm-form-error">{{ $message }}</div>@enderror
-        </div>
-    </div>
-
     <div class="adm-form-actions" style="border-top:none; padding-top:0;">
         <a href="{{ route('admin.dashboard') }}" class="btn-secondary">Cancel</a>
         <button type="submit" class="btn-primary">💾 Save Landing Page</button>
     </div>
 </form>
 @endsection
-
-@push('scripts')
-<script>
-    // Validate JSON before submit
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const textarea = document.querySelector('textarea[name="plans"]');
-        try {
-            JSON.parse(textarea.value);
-        } catch (err) {
-            e.preventDefault();
-            textarea.style.borderColor = 'rgba(255,82,82,0.7)';
-            alert('Plans JSON is invalid. Please check the format.\n\n' + err.message);
-        }
-    });
-</script>
-@endpush

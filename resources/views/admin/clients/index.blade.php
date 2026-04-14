@@ -256,16 +256,12 @@
                 {{-- Account & Service --}}
                 <div class="modal-section-label" style="margin-top:18px;">Account & Service</div>
                 <div class="adm-form-group">
-                    <label>Username *</label>
-                    <input type="text" name="username" value="{{ old('username') }}" required>
-                </div>
-                <div class="adm-form-group">
                     <label>Plan / Subscription</label>
                     <select name="plan_interest">
                         <option value="">— Select Plan —</option>
-                        @foreach(\App\Models\LandingSetting::first()?->plans ?? [] as $plan)
-                        <option value="{{ $plan['name'] }}" {{ old('plan_interest') === $plan['name'] ? 'selected' : '' }}>
-                            {{ $plan['name'] }} — ₱{{ $plan['price'] }}/mo
+                        @foreach(\App\Models\Plan::where('is_active', true)->get() as $plan)
+                        <option value="{{ $plan->name }}" {{ old('plan_interest') === $plan->name ? 'selected' : '' }}>
+                            {{ $plan->name }} — ₱{{ number_format($plan->price, 2) }}/mo
                         </option>
                         @endforeach
                     </select>
@@ -414,6 +410,11 @@
                     <label>Plan / Subscription</label>
                     <select id="edit-plan" name="plan_interest">
                         <option value="">— Select Plan —</option>
+                        @foreach(\App\Models\Plan::where('is_active', true)->get() as $plan)
+                        <option value="{{ $plan->name }}">
+                            {{ $plan->name }} — ₱{{ number_format($plan->price, 2) }}/mo
+                        </option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="adm-form-group">
@@ -424,6 +425,11 @@
                     <label>Assign MikroTik Router</label>
                     <select id="edit-mikrotik" name="mikrotik_id">
                         <option value="">— Not assigned —</option>
+                        @foreach($mikrotiks as $mt)
+                        <option value="{{ $mt->id }}">
+                            {{ $mt->name }}@if($mt->location) — {{ $mt->location }}@endif
+                        </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -496,6 +502,45 @@
 .vvalue{font-size:13px;color:#fff;flex:1;}
 .copy-btn{background:rgba(129,212,250,0.12);color:#81d4fa;border:1px solid rgba(129,212,250,0.3);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;transition:all 0.2s;}
 .copy-btn:hover{background:rgba(129,212,250,0.25);border-color:rgba(129,212,250,0.6);}
+
+/* Light mode styles for modals */
+body.light-mode .modal-backdrop {
+    background: rgba(0,0,0,0.3);
+}
+body.light-mode .modal-box {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+body.light-mode .modal-title {
+    color: #000;
+}
+body.light-mode .modal-close {
+    background: rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.1);
+    color: rgba(0,0,0,0.6);
+}
+body.light-mode .modal-close:hover {
+    background: rgba(255,82,82,0.2);
+    color: #ff6b6b;
+    border-color: rgba(255,82,82,0.3);
+}
+body.light-mode .modal-header,
+body.light-mode .modal-footer {
+    border-color: rgba(0,0,0,0.1);
+}
+body.light-mode .modal-section-label {
+    color: rgba(255,82,82,0.7);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+body.light-mode .vrow {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+body.light-mode .vlabel {
+    color: rgba(0,0,0,0.6);
+}
+body.light-mode .vvalue {
+    color: #000;
+}
 </style>
 
 @endsection

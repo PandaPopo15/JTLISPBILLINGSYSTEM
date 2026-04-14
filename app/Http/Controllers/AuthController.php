@@ -3,29 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
-    /**
-     * Show registration form
-     */
     public function showRegister(Request $request)
     {
-        $settings    = \App\Models\LandingSetting::first();
-        $plans       = $settings ? ($settings->plans ?? []) : [];
+        $plans = Plan::active()->get();
         $selectedPlan = $request->query('plan');
         return view('auth.register', compact('plans', 'selectedPlan'));
     }
 
-    /**
-     * Handle registration
-     */
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -60,25 +53,20 @@ class AuthController extends Controller
             'status'        => 'pending',
         ]);
 
-        // Send verification email
         $this->sendVerificationEmail($user);
 
         return redirect('/login')
             ->with('success', 'Registration successful! Verification sent — check your inbox for the email link before logging in.');
     }
 
-    /**
-     * Send verification email to user
-     */
     private function sendVerificationEmail(User $user)
     {
         $verificationToken = Str::random(64);
-        
-        // Store token in password_reset_tokens table temporarily for verification
-        \DB::table('password_reset_tokens')->updateOrInsert(
+
+        DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
             [
-                'token' => Hash::make($verificationToken),
+                'token' => $verificationToken,
                 'created_at' => now(),
             ]
         );
@@ -97,15 +85,11 @@ class AuthController extends Controller
         });
     }
 
-    /**
-     * Verify email with token
-     */
     public function verifyEmail(Request $request)
     {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-        ]);
+        if (!$request->token || !$request->email) {
+            return redirect('/login')->with('error', 'Invalid verification link.');
+        }
 
         $user = User::where('email', $request->email)->first();
 
@@ -117,31 +101,25 @@ class AuthController extends Controller
             return redirect('/login')->with('success', 'Your email is already verified.');
         }
 
-        $reset = \DB::table('password_reset_tokens')
+        $reset = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->first();
 
-        if (!$reset || !Hash::check($request->token, $reset->token)) {
+        if (!$reset || $reset->token !== $request->token) {
             return redirect('/login')->with('error', 'Invalid verification token.');
         }
 
-        // Check if token is not expired (24 hours)
-        if (now()->diffInHours($reset->created_at) > 24) {
-            return redirect('/login')->with('error', 'Verification token expired. Please register again.');
+        if (now()->diffInHours(\Carbon\Carbon::parse($reset->created_at)) > 24) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return redirect('/login')->with('error', 'Verification link expired. Please register again.');
         }
 
-        // Mark email as verified
         $user->update(['email_verified_at' => now()]);
-
-        // Delete the token
-        \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
         return redirect('/login')->with('success', 'Email verified successfully! You can now log in.');
     }
 
-    /**
-     * Resend verification email
-     */
     public function resendVerificationEmail(Request $request)
     {
         $request->validate([

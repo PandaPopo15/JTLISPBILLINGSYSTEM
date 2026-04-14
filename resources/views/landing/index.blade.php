@@ -157,11 +157,35 @@
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 28px;
             padding: 32px;
-            min-height: 360px;
+            min-height: 420px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .plan-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+        .plan-card.popular {
+            border-color: {{ $settings->theme_color }};
+            background: rgba(255,82,82,0.08);
+        }
+        .plan-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: {{ $settings->theme_color }};
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .plan-card h3 {
             margin: 0 0 12px;
@@ -169,12 +193,19 @@
         }
         .plan-price {
             font-size: 3rem;
-            margin: 0 0 16px;
+            margin: 0 0 4px;
             color: {{ $settings->theme_color }};
+            font-weight: 800;
+        }
+        .plan-period {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 16px;
         }
         .plan-description {
             color: rgba(255,255,255,0.74);
             margin-bottom: 20px;
+            font-size: 14px;
         }
         .plan-list {
             list-style: none;
@@ -188,11 +219,13 @@
             align-items: center;
             gap: 10px;
             color: rgba(255,255,255,0.82);
+            font-size: 13px;
         }
         .plan-list li::before {
             content: '✓';
             color: {{ $settings->theme_color }};
             font-weight: bold;
+            flex-shrink: 0;
         }
         .plan-card a {
             display: inline-flex;
@@ -226,7 +259,7 @@
             margin-bottom: 10px;
             color: #fff;
         }
-@media (max-width: 1100px) {
+        @media (max-width: 1100px) {
             .hero { 
                 grid-template-columns: 1fr; 
                 gap: 24px;
@@ -332,23 +365,35 @@
             </div>
         </section>
 
+        @if($plans->count())
         <div class="plans-grid">
-            @foreach($settings->plans as $plan)
-                <div class="plan-card">
+            @foreach($plans as $plan)
+                <div class="plan-card {{ $plan->is_popular ? 'popular' : '' }}">
+                    @if($plan->is_popular)
+                        <div class="plan-badge">⭐ Most Popular</div>
+                    @endif
                     <div>
-                        <h3>{{ $plan['name'] }}</h3>
-                        <div class="plan-price">₱{{ $plan['price'] }}</div>
-                        <p class="plan-description">{{ $plan['description'] }}</p>
+                        <h3>{{ $plan->name }}</h3>
+                        <div class="plan-price">₱{{ number_format($plan->price, 0) }}</div>
+                        <div class="plan-period">/month</div>
+                        @if($plan->description)
+                            <p class="plan-description">{{ $plan->description }}</p>
+                        @endif
                         <ul class="plan-list">
-                            @foreach($plan['features'] as $feature)
-                                <li>{{ $feature }}</li>
-                            @endforeach
+                            <li>{{ $plan->speed }} speed</li>
+                            <li>Unlimited bandwidth</li>
+                            @if($plan->installation_fee > 0)
+                                <li>Installation: ₱{{ number_format($plan->installation_fee, 0) }}</li>
+                            @else
+                                <li>Free installation</li>
+                            @endif
                         </ul>
                     </div>
-                    <a href="{{ route('register.show', ['plan' => $plan['name']]) }}">Select Plan</a>
+                    <a href="{{ route('register.show', ['plan' => $plan->name]) }}">Get Started</a>
                 </div>
             @endforeach
         </div>
+        @endif
 
         <div class="info-grid">
             <div class="info-card">

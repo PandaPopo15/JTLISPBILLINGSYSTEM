@@ -261,12 +261,12 @@
                 @foreach($plans as $plan)
                 <div>
                     <input type="radio" name="plan_interest" id="plan_{{ $loop->index }}"
-                           value="{{ $plan['name'] }}" class="plan-option"
-                           {{ old('plan_interest', $selectedPlan ?? '') === $plan['name'] ? 'checked' : '' }}>
+                           value="{{ $plan->name }}" class="plan-option"
+                           {{ old('plan_interest', $selectedPlan ?? '') === $plan->name ? 'checked' : '' }}>
                     <label for="plan_{{ $loop->index }}" class="plan-label">
-                        <span class="plan-name">{{ $plan['name'] }}</span>
-                        <span class="plan-price">₱{{ $plan['price'] }}<span style="font-size:11px; font-weight:400; color:rgba(255,255,255,0.4);">/mo</span></span>
-                        <span class="plan-desc">{{ $plan['description'] }}</span>
+                        <span class="plan-name">{{ $plan->name }}</span>
+                        <span class="plan-price">₱{{ number_format($plan->price, 0) }}<span style="font-size:11px; font-weight:400; color:rgba(255,255,255,0.4);">/mo</span></span>
+                        <span class="plan-desc">{{ $plan->speed }}</span>
                     </label>
                 </div>
                 @endforeach

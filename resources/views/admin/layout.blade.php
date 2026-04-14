@@ -36,18 +36,20 @@
         .adm-header-right { display: flex; align-items: center; gap: 12px; position: relative; }
         .adm-theme-toggle {
             width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(255,255,255,0.1); color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent; color: #fff;
+            border: none;
             display: flex; align-items: center; justify-content: center;
             font-size: 16px; cursor: pointer; transition: all 0.2s;
+            pointer-events: auto; z-index: 10;
         }
-        .adm-theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .adm-theme-toggle:hover { opacity: 0.8; }
         .adm-profile-btn {
             width: 38px; height: 38px; border-radius: 50%;
             background: linear-gradient(135deg, #ff6b6b, #d50000);
             color: #fff; display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: 14px; cursor: pointer;
             border: none; overflow: hidden; flex-shrink: 0;
+            pointer-events: auto; z-index: 10;
         }
         .adm-profile-btn img { width: 100%; height: 100%; object-fit: cover; }
         .adm-dropdown {
@@ -57,6 +59,49 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
         .adm-dropdown.open { display: block; }
+        .adm-notif-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: transparent; color: #fff;
+            border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; cursor: pointer; transition: all 0.2s;
+            position: relative;
+            pointer-events: auto; z-index: 10;
+        }
+        .adm-notif-btn:hover { opacity: 0.8; }
+        .adm-notif-badge {
+            position: absolute; top: -4px; right: -4px;
+            background: #ff5252; color: #fff; font-size: 10px;
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; border: 2px solid #0a0a0a;
+        }
+        .adm-notif-dropdown {
+            position: absolute; top: 46px; right: 50px;
+            background: #111; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; min-width: 320px; display: none; z-index: 1001;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5); max-height: 400px;
+            overflow-y: auto;
+        }
+        .adm-notif-dropdown.open { display: block; }
+        .adm-notif-header {
+            padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-weight: 600; font-size: 14px; color: #fff;
+        }
+        .adm-notif-item {
+            padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.85); font-size: 13px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .adm-notif-item:hover { background: rgba(255,255,255,0.08); }
+        .adm-notif-item:last-child { border-bottom: none; }
+        .adm-notif-empty {
+            padding: 24px 16px; text-align: center;
+            color: rgba(255,255,255,0.4); font-size: 13px;
+        }
+        .adm-notif-time {
+            font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px;
+        }
         .adm-dropdown a, .adm-dropdown button {
             display: block; width: 100%; text-align: left;
             padding: 10px 16px; color: #f5f5f5; text-decoration: none;
@@ -158,12 +203,19 @@
             position: relative; overflow: hidden;
         }
         .adm-toast.error { border-left-color: #ff5252; border-color: rgba(255,82,82,0.4); }
+        .adm-toast.welcome {
+            background: linear-gradient(135deg, rgba(255,82,82,0.95) 0%, rgba(213,0,0,0.95) 100%);
+            border: 1px solid rgba(255,82,82,0.6);
+            border-left: 4px solid #ff6b6b;
+            padding: 18px 20px;
+        }
         .adm-toast-bar {
             position: absolute; bottom: 0; left: 0; height: 3px;
             background: #4caf50; width: 100%;
             animation: toastBar 4s linear forwards;
         }
         .adm-toast.error .adm-toast-bar { background: #ff5252; }
+        .adm-toast.welcome .adm-toast-bar { background: #ff6b6b; }
         @keyframes toastBar { from { width: 100%; } to { width: 0; } }
 
         /* ── PAGE HEADER ── */
@@ -264,12 +316,15 @@
         /* ── KPI CARDS ── */
         .adm-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 28px; }
         .adm-kpi {
-            background: rgba(18,18,18,0.95); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px; padding: 22px;
+            background: rgba(18,18,18,0.95);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
         }
-        .adm-kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.5); margin-bottom: 10px; }
+        .adm-kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.5); margin-bottom: 10px; font-weight: 700; }
         .adm-kpi-value { font-size: 36px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 6px; }
-        .adm-kpi-sub { font-size: 12px; color: rgba(255,255,255,0.4); }
+        .adm-kpi-sub { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 600; }
 
         /* ── PAGINATION ── */
         .adm-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 20px; flex-wrap: wrap; }
@@ -339,6 +394,12 @@
         body.light-mode .adm-page-title { color: #000000; }
         body.light-mode .adm-page-subtitle { color: #000000; }
         body.light-mode .adm-toast { background: rgba(255,255,255,0.98); color: #000000; }
+        body.light-mode .adm-toast.welcome {
+            background: linear-gradient(135deg, rgba(0,123,255,0.95) 0%, rgba(0,86,179,0.95) 100%);
+            border: 1px solid rgba(0,123,255,0.6);
+            border-left: 4px solid #007bff;
+            color: #fff;
+        }
         body.light-mode .adm-dropdown { background: #fff; border: 1px solid rgba(0,0,0,0.1); }
         body.light-mode .adm-dropdown a, body.light-mode .adm-dropdown button { color: #000000; }
         body.light-mode .adm-dropdown a:hover, body.light-mode .adm-dropdown button:hover { background: rgba(0,0,0,0.08); }
@@ -369,8 +430,21 @@
         }
         body.light-mode .adm-search-bar input:focus, body.light-mode .adm-search-bar select:focus { border-color: rgba(0,123,255,0.4); }
         body.light-mode .adm-search-bar select option { background: #fff; }
+        body.light-mode .adm-kpi {
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+        }
+        body.light-mode .adm-kpi-label { color: #000000; }
+        body.light-mode .adm-kpi-value { color: #000000; }
+        body.light-mode .adm-kpi-sub { color: #000000; }
         body.light-mode .adm-theme-toggle { background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.2); color: #000000; }
         body.light-mode .adm-theme-toggle:hover { background: rgba(0,0,0,0.2); }
+        body.light-mode .adm-notif-dropdown { background: #fff; border: 1px solid rgba(0,0,0,0.1); }
+        body.light-mode .adm-notif-header { color: #000000; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        body.light-mode .adm-notif-item { color: #000000; }
+        body.light-mode .adm-notif-item:hover { background: rgba(0,0,0,0.08); }
+        body.light-mode .adm-notif-empty { color: #000000; }
 
 @media (max-width: 768px) {
             .adm-header {
@@ -469,6 +543,16 @@
     </div>
     <div class="adm-header-right">
         <button class="adm-theme-toggle" id="adm-theme-toggle">🌙</button>
+        <button class="adm-notif-btn" id="adm-notif-btn">
+            🔔
+            <span class="adm-notif-badge" id="adm-notif-badge" style="display: none;">0</span>
+        </button>
+        <div class="adm-notif-dropdown" id="adm-notif-dropdown">
+            <div class="adm-notif-header">Notifications</div>
+            <div id="adm-notif-list">
+                <div class="adm-notif-empty">No notifications yet</div>
+            </div>
+        </div>
         <div class="adm-user-info">
             <div class="adm-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
             <div class="adm-user-role">Administrator</div>
@@ -503,6 +587,11 @@
             <span class="nav-icon">📊</span> Dashboard
         </a>
 
+        <a href="{{ route('admin.sales') }}"
+           class="adm-nav-item {{ request()->routeIs('admin.sales') ? 'active' : '' }}">
+            <span class="nav-icon">💰</span> Sales
+        </a>
+
         <a href="{{ route('admin.clients') }}"
            class="adm-nav-item {{ request()->routeIs('admin.clients*') ? 'active' : '' }}">
             <span class="nav-icon">👥</span> Customers
@@ -514,6 +603,11 @@
         </a>
 
         <div class="adm-nav-label">Content</div>
+
+        <a href="{{ route('admin.plans') }}"
+           class="adm-nav-item {{ request()->routeIs('admin.plans*') ? 'active' : '' }}">
+            <span class="nav-icon">📋</span> Plans & Pricing
+        </a>
 
         <a href="{{ route('admin.landing') }}"
            class="adm-nav-item {{ request()->routeIs('admin.landing*') ? 'active' : '' }}">
@@ -541,8 +635,20 @@
     <main class="adm-main" id="adm-main">
 
         {{-- TOASTS --}}
-        @if(session('success') || session('error'))
+        @if(session('success') || session('error') || session('welcome'))
         <div class="adm-toast-wrap">
+            @if(session('welcome'))
+            <div class="adm-toast welcome" id="adm-toast-welcome">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="font-size:28px;">👋</div>
+                    <div>
+                        <div style="font-weight:700;font-size:16px;margin-bottom:2px;">Welcome back!</div>
+                        <div style="font-size:13px;opacity:0.9;">Hello, {{ session('welcome') }}! Ready to manage your ISP?</div>
+                    </div>
+                </div>
+                <div class="adm-toast-bar"></div>
+            </div>
+            @endif
             @if(session('success'))
             <div class="adm-toast" id="adm-toast">
                 ✅ {{ session('success') }}
@@ -563,6 +669,16 @@
 </div>
 
 <script>
+    // Notification dropdown
+    const notifBtn = document.getElementById('adm-notif-btn');
+    const notifDropdown = document.getElementById('adm-notif-dropdown');
+    notifBtn.addEventListener('click', () => notifDropdown.classList.toggle('open'));
+    document.addEventListener('click', e => {
+        if (!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
+            notifDropdown.classList.remove('open');
+        }
+    });
+
     // Profile dropdown
     const profileBtn = document.getElementById('adm-profile-btn');
     const dropdown   = document.getElementById('adm-dropdown');
@@ -602,6 +718,7 @@
         document.body.classList.toggle('light-mode', !isDark);
         themeBtn.textContent = isDark ? '🌙' : '☀️';
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.body.dispatchEvent(new Event('themeChanged'));
     });
     // Load saved theme
     const savedTheme = localStorage.getItem('theme');
@@ -612,7 +729,7 @@
     }
 
     // Auto-dismiss toasts
-    ['adm-toast', 'adm-toast-err'].forEach(id => {
+    ['adm-toast', 'adm-toast-err', 'adm-toast-welcome'].forEach(id => {
         const el = document.getElementById(id);
         if (el) setTimeout(() => el.remove(), 4500);
     });
