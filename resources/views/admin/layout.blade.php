@@ -3,7 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin') — ISP Billing</title>
+    <title>@yield('title', 'Admin') — {{ $dashboardSettings->dashboard_title ?? 'ISP Billing' }}</title>
+    @if(isset($dashboardSettings) && $dashboardSettings->favicon)
+    <link rel="icon" href="{{ asset('storage/' . $dashboardSettings->favicon) }}" type="image/x-icon">
+    @endif
+    @if(isset($dashboardSettings) && $dashboardSettings->primary_color)
+    <style>
+        :root {
+            --primary-color: {{ $dashboardSettings->primary_color }};
+        }
+        .adm-header-brand span { color: var(--primary-color) !important; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-color)) !important;
+        }
+        .adm-nav-item.active {
+            background: rgba({{ hexdec(substr($dashboardSettings->primary_color, 1, 2)) }}, {{ hexdec(substr($dashboardSettings->primary_color, 3, 2)) }}, {{ hexdec(substr($dashboardSettings->primary_color, 5, 2)) }}, 0.15) !important;
+            color: var(--primary-color) !important;
+            border-color: rgba({{ hexdec(substr($dashboardSettings->primary_color, 1, 2)) }}, {{ hexdec(substr($dashboardSettings->primary_color, 3, 2)) }}, {{ hexdec(substr($dashboardSettings->primary_color, 5, 2)) }}, 0.3) !important;
+        }
+        .adm-sidebar-toggle {
+            background: var(--primary-color) !important;
+        }
+    </style>
+    @endif
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -465,7 +487,9 @@
             }
             .adm-main { 
                 margin-left: 0; 
-                padding: 20px 16px; 
+                padding: 20px 16px;
+                max-width: 100vw;
+                overflow-x: hidden;
             }
             .adm-page-header {
                 flex-direction: column; 
@@ -515,6 +539,8 @@
             }
             .adm-card {
                 padding: 20px;
+                max-width: 100%;
+                overflow: hidden;
             }
         }
 
@@ -539,7 +565,10 @@
 {{-- HEADER --}}
 <header class="adm-header">
     <div class="adm-header-left">
-        <div class="adm-header-brand">ISP <span>Billing</span></div>
+        @if(isset($dashboardSettings) && $dashboardSettings->dashboard_logo)
+            <img src="{{ asset('storage/' . $dashboardSettings->dashboard_logo) }}" alt="Logo" style="height:32px;margin-right:8px;">
+        @endif
+        <div class="adm-header-brand">{{ $dashboardSettings->dashboard_title ?? 'ISP' }} <span>{{ $dashboardSettings->dashboard_tagline ? '' : 'Billing' }}</span></div>
     </div>
     <div class="adm-header-right">
         <button class="adm-theme-toggle" id="adm-theme-toggle">🌙</button>
@@ -602,6 +631,18 @@
             <span class="nav-icon">🔌</span> MikroTik Routers
         </a>
 
+        <div class="adm-nav-label">Technician</div>
+
+        <a href="{{ route('admin.installers') }}"
+           class="adm-nav-item {{ request()->routeIs('admin.installers*') ? 'active' : '' }}">
+            <span class="nav-icon">🔧</span> Installers
+        </a>
+
+        <a href="{{ route('admin.job-orders') }}"
+           class="adm-nav-item {{ request()->routeIs('admin.job-orders*') ? 'active' : '' }}">
+            <span class="nav-icon">📋</span> Job Orders
+        </a>
+
         <div class="adm-nav-label">Content</div>
 
         <a href="{{ route('admin.plans') }}"
@@ -614,19 +655,12 @@
             <span class="nav-icon">🌐</span> Landing Page
         </a>
 
-        <div class="adm-nav-label">Account</div>
+        <div class="adm-nav-label">Website</div>
 
         <a href="{{ route('admin.settings') }}"
            class="adm-nav-item {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
-            <span class="nav-icon">⚙️</span> Admin Settings
+            <span class="nav-icon">⚙️</span> Website Settings
         </a>
-
-        <form action="{{ route('logout') }}" method="POST" style="margin-top: 8px;">
-            @csrf
-            <button type="submit" class="adm-nav-item" style="width:100%; background:none; border:none; text-align:left;">
-                <span class="nav-icon">🚪</span> Sign Out
-            </button>
-        </form>
     </aside>
 
     <div class="adm-sidebar-backdrop" id="adm-sidebar-backdrop"></div>
@@ -694,7 +728,27 @@
     const main         = document.getElementById('adm-main');
     const toggleBtn    = document.getElementById('adm-sidebar-toggle');
     const backdrop     = document.getElementById('adm-sidebar-backdrop');
-    let collapsed = false;
+    let collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    
+    // Apply saved state on load
+    if (collapsed) {
+        sidebar.classList.add('collapsed');
+        main.classList.add('expanded');
+        toggleBtn.classList.add('collapsed');
+        toggleBtn.textContent = '▶';
+    }
+    
+    // Restore scroll position
+    const savedScrollPos = sessionStorage.getItem('sidebarScrollPos');
+    if (savedScrollPos) {
+        sidebar.scrollTop = parseInt(savedScrollPos);
+    }
+    
+    // Save scroll position before navigation
+    sidebar.addEventListener('scroll', () => {
+        sessionStorage.setItem('sidebarScrollPos', sidebar.scrollTop);
+    });
+    
     toggleBtn.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
             sidebar.classList.toggle('mobile-open');
@@ -704,6 +758,7 @@
             main.classList.toggle('expanded', collapsed);
             toggleBtn.classList.toggle('collapsed', collapsed);
             toggleBtn.textContent = collapsed ? '▶' : '◀';
+            localStorage.setItem('sidebarCollapsed', collapsed);
         }
     });
     backdrop.addEventListener('click', () => {

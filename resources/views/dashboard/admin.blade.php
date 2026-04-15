@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;">
+<div class="dashboard-two-col-grid">
     <div class="adm-card">
         <h3 style="font-size:16px; font-weight:600; margin-bottom:16px; color:#fff;">Recent Customers</h3>
         @if($recentClients->count())
@@ -86,7 +86,7 @@
 
 <div class="adm-card">
     <h3 style="font-size:16px; font-weight:600; margin-bottom:20px; color:#fff;">📅 Account Dues - {{ $now->format('F Y') }}</h3>
-    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+    <div class="calendar-grid">
         @php
             $daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             $firstDay = $now->copy()->startOfMonth();
@@ -297,5 +297,83 @@ body.light-mode #due-modal-body .vvalue {
 .vrow:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
 .vlabel{font-size:11px;text-transform:uppercase;letter-spacing:0.7px;color:rgba(255,255,255,0.38);width:120px;flex-shrink:0;padding-top:2px;}
 .vvalue{font-size:13px;color:#fff;flex:1;}
+
+.dashboard-two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-two-col-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .dashboard-two-col-grid .adm-card {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    .calendar-grid {
+        gap: 4px;
+    }
+    
+    .calendar-grid > div {
+        min-height: 60px !important;
+        font-size: 11px !important;
+        padding: 6px 4px !important;
+    }
+    
+    .calendar-grid > div > div:first-child {
+        font-size: 12px !important;
+    }
+    
+    .adm-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -24px;
+        padding: 0 24px;
+        max-width: calc(100vw - 32px);
+    }
+    
+    .adm-table {
+        min-width: 500px;
+    }
+    
+    .dashboard-two-col-grid .adm-card h3 {
+        font-size: 15px !important;
+        margin-bottom: 14px !important;
+    }
+    
+    .dashboard-two-col-grid .adm-card .btn-secondary {
+        width: 100%;
+        justify-content: center !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-grid {
+        gap: 2px;
+    }
+    
+    .calendar-grid > div {
+        min-height: 50px !important;
+        font-size: 10px !important;
+        padding: 4px 2px !important;
+    }
+    
+    .calendar-grid > div > div:first-child {
+        font-size: 11px !important;
+    }
+}
 </style>
 @endsection

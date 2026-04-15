@@ -79,6 +79,10 @@
         </div>
 
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,82,82,0.7);margin:4px 0 14px;">Service & Connection</div>
+        <div style="background:rgba(129,212,250,0.08);border:1px solid rgba(129,212,250,0.3);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;">
+            <strong style="color:#81d4fa;">ℹ️ PPPoE Credentials</strong><br>
+            These credentials are used for MikroTik PPPoE connection, separate from login credentials.
+        </div>
         <div class="adm-form-row">
             <div class="adm-form-group">
                 <label>PPPoE Username</label>
@@ -87,16 +91,22 @@
                 @error('pppoe_username')<div class="adm-form-error">{{ $message }}</div>@enderror
             </div>
             <div class="adm-form-group">
-                <label>Plan / Subscription</label>
-                <select name="plan_interest">
-                    <option value="">— None —</option>
-                    @foreach(\App\Models\LandingSetting::first()?->plans ?? [] as $plan)
-                    <option value="{{ $plan['name'] }}" {{ old('plan_interest', $client->plan_interest) === $plan['name'] ? 'selected' : '' }}>
-                        {{ $plan['name'] }} — ₱{{ $plan['price'] }}/mo
-                    </option>
-                    @endforeach
-                </select>
+                <label>PPPoE Password</label>
+                <input type="text" name="pppoe_password" value="{{ old('pppoe_password', $client->pppoe_password) }}"
+                       placeholder="PPPoE connection password" style="font-family:monospace;">
+                @error('pppoe_password')<div class="adm-form-error">{{ $message }}</div>@enderror
             </div>
+        </div>
+        <div class="adm-form-group">
+            <label>Plan / Subscription</label>
+            <select name="plan_interest">
+                <option value="">— None —</option>
+                @foreach(\App\Models\LandingSetting::first()?->plans ?? [] as $plan)
+                <option value="{{ $plan['name'] }}" {{ old('plan_interest', $client->plan_interest) === $plan['name'] ? 'selected' : '' }}>
+                    {{ $plan['name'] }} — ₱{{ $plan['price'] }}/mo
+                </option>
+                @endforeach
+            </select>
         </div>
 
         <div class="adm-form-group">
@@ -150,15 +160,20 @@
             </div>
         </div>
 
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,82,82,0.7);margin:24px 0 14px;">Login Credentials</div>
+        <div style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.3);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;">
+            <strong style="color:#ffb74d;">ℹ️ System Login Password</strong><br>
+            This password is used for logging into the billing system, separate from PPPoE credentials.
+        </div>
         <div class="adm-form-group">
-            <label>Password (Leave blank to keep current)</label>
-            <input type="password" name="password" autocomplete="new-password">
+            <label>Login Password (Leave blank to keep current)</label>
+            <input type="password" name="password" autocomplete="new-password" placeholder="New login password for system access">
             @error('password')<div class="adm-form-error">{{ $message }}</div>@enderror
         </div>
 
         <div class="adm-form-group">
-            <label>Confirm Password</label>
-            <input type="password" name="password_confirmation" autocomplete="new-password">
+            <label>Confirm Login Password</label>
+            <input type="password" name="password_confirmation" autocomplete="new-password" placeholder="Confirm new login password">
         </div>
 
         <div class="adm-form-actions">
@@ -175,7 +190,7 @@
 <script>
     const lat = {{ $client->latitude ?? 'null' }};
     const lng = {{ $client->longitude ?? 'null' }};
-    const map = L.map('edit-map').setView(lat && lng ? [lat, lng] : [9.7517, 122.4003], lat && lng ? 15 : 15);
+    const map = L.map('edit-map').setView(lat && lng ? [lat, lng] : [9.668866, 122.460734], lat && lng ? 15 : 15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap', maxZoom: 19
     }).addTo(map);

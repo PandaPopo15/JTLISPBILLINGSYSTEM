@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - ISP Billing</title>
+    @php
+        $settings = \App\Models\LandingSetting::first();
+    @endphp
+    @if($settings && $settings->favicon)
+    <link rel="icon" href="{{ asset('storage/' . $settings->favicon) }}" type="image/x-icon">
+    @endif
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -45,11 +51,21 @@
             box-shadow: 0 0 40px rgba(255,0,0,0.12), 0 24px 60px rgba(0,0,0,0.6);
             animation: borderPulse 4s ease-in-out infinite;
         }
+        
+        /* Disable heavy animations on mobile */
+        @media (max-width: 768px) {
+            .form-container {
+                animation: none;
+                backdrop-filter: blur(5px);
+                padding: 28px 20px;
+            }
+        }
+        
         @keyframes borderPulse {
             0%,100% { border-color: rgba(255,0,0,0.3); box-shadow: 0 0 20px rgba(255,0,0,0.08), 0 24px 60px rgba(0,0,0,0.6); }
             50%      { border-color: rgba(255,0,0,0.6); box-shadow: 0 0 40px rgba(255,0,0,0.2), 0 24px 60px rgba(0,0,0,0.6); }
         }
-        .form-header { text-align:center; margin-bottom:28px; }
+        .form-header { text-align:center; margin-bottom:28px; min-height:100px; display:flex; flex-direction:column; justify-content:center; align-items:center; }
         .form-header h1 {
             font-size: 26px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
             background: linear-gradient(90deg, #fff, rgba(255,80,80,0.9));
@@ -163,8 +179,19 @@
         @keyframes tbar { from{width:100%} to{width:0} }
 
         @media(max-width:520px) {
-            .form-container { padding: 28px 20px; }
+            .form-container { padding: 24px 16px; }
             .form-row { grid-template-columns: 1fr; }
+            .plan-grid { grid-template-columns: 1fr; }
+            #map { height: 220px; }
+        }
+        
+        /* Additional mobile optimizations */
+        @media (max-width: 768px) {
+            body { padding: 20px 12px; }
+            .form-header h1 { font-size: 22px; }
+            .section-title { font-size: 10px; margin: 18px 0 12px; }
+            input, select, textarea { padding: 10px 12px; font-size: 13px; }
+            .btn-submit { padding: 12px; font-size: 12px; }
         }
     </style>
 </head>
@@ -181,7 +208,11 @@
 <div class="container">
     <div class="form-container">
         <div class="form-header">
-            <h1>ISP Billing</h1>
+            @if($settings && $settings->isp_logo)
+                <img src="{{ asset('storage/' . $settings->isp_logo) }}" alt="ISP Logo" style="max-width:100%;max-height:90px;object-fit:contain;">
+            @else
+                <h1>ISP Billing</h1>
+            @endif
             <p>Create Your Account</p>
         </div>
 
@@ -315,7 +346,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     // Init map centered on Brgy. Nabulao, Sipalay City, Negros Occidental
-    const map = L.map('map').setView([9.7517, 122.4003], 15);
+    const map = L.map('map').setView([9.668866, 122.460734], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',

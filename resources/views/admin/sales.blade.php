@@ -36,7 +36,7 @@
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;">
+<div class="sales-two-col-grid">
     <div class="adm-card">
         <h3 style="font-size:16px; font-weight:600; margin-bottom:20px;">📈 Revenue Trend (Last 6 Months)</h3>
         <canvas id="revenueChart" style="max-height: 300px;"></canvas>
@@ -193,6 +193,93 @@
     <p style="opacity:0.5; font-size:14px; text-align:center; padding:40px;">No payments yet.</p>
     @endif
 </div>
+
+<style>
+.sales-two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+@media (max-width: 768px) {
+    .sales-two-col-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .sales-two-col-grid .adm-card {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    .adm-page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .adm-page-header > div:last-child {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .adm-page-header button,
+    .adm-page-header a {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .adm-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -24px;
+        padding: 0 24px;
+        max-width: calc(100vw - 32px);
+    }
+    
+    .adm-table {
+        min-width: 700px;
+        font-size: 12px;
+    }
+    
+    .adm-table th,
+    .adm-table td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+    
+    #revenueChart {
+        max-height: 250px !important;
+    }
+    
+    .adm-card h3 {
+        font-size: 15px !important;
+    }
+    
+    .sales-two-col-grid .adm-card > div {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .adm-table {
+        font-size: 11px;
+    }
+    
+    .adm-table th,
+    .adm-table td {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+    
+    #revenueChart {
+        max-height: 200px !important;
+    }
+}
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>

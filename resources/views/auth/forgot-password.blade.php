@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password - ISP Billing</title>
+    @php
+        $settings = \App\Models\LandingSetting::first();
+    @endphp
+    @if($settings && $settings->favicon)
+    <link rel="icon" href="{{ asset('storage/' . $settings->favicon) }}" type="image/x-icon">
+    @endif
     <style>
         * {
             margin: 0;
@@ -40,6 +46,13 @@
             opacity: 0.1;
         }
 
+        /* Reduce particles on mobile */
+        @media (max-width: 768px) {
+            .particle:nth-child(n+4) {
+                display: none;
+            }
+        }
+
         .particle:nth-child(1) { width: 100px; height: 100px; left: 10%; top: 10%; animation-duration: 25s; }
         .particle:nth-child(2) { width: 150px; height: 150px; right: 5%; top: 30%; animation-duration: 30s; animation-delay: 5s; }
         .particle:nth-child(3) { width: 80px; height: 80px; left: 20%; bottom: 20%; animation-duration: 28s; animation-delay: 10s; }
@@ -64,6 +77,13 @@
             background-size: 50px 50px;
             z-index: 1;
             pointer-events: none;
+        }
+
+        /* Disable glow lines on mobile */
+        @media (max-width: 768px) {
+            .glow-line {
+                display: none;
+            }
         }
 
         .glow-line {
@@ -111,6 +131,15 @@
             position: relative;
             box-shadow: 0 0 30px rgba(255, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 0, 0, 0.05);
             animation: borderGlow 3s ease-in-out infinite;
+        }
+
+        /* Disable heavy animations on mobile */
+        @media (max-width: 768px) {
+            .form-container {
+                animation: none;
+                backdrop-filter: blur(5px);
+                padding: 32px 20px;
+            }
         }
 
         @keyframes borderGlow {
@@ -282,6 +311,13 @@
         .corner-decoration {
             position: fixed;
             z-index: 2;
+        }
+
+        /* Hide corner decorations on mobile */
+        @media (max-width: 768px) {
+            .corner-decoration {
+                display: none;
+            }
         }
 
         .corner-tl {

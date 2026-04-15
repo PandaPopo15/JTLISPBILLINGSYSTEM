@@ -22,7 +22,7 @@ class User extends Authenticatable
         'username', 'email', 'phone_number',
         'address', 'latitude', 'longitude',
         'age', 'plan_interest', 'mikrotik_id',
-        'pppoe_username', 'status',
+        'pppoe_username', 'pppoe_password', 'status',
         'password', 'is_admin', 'email_verified_at',
         'profile_image',
         'due_date',
@@ -50,7 +50,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'due_date' => 'date',
             'installation_date' => 'date',
-            'is_admin' => 'boolean',
+            'is_admin' => 'integer',
         ];
     }
 
@@ -63,11 +63,38 @@ class User extends Authenticatable
     }
 
     /**
+     * Get location attribute (latitude,longitude)
+     */
+    public function getLocationAttribute()
+    {
+        if ($this->latitude && $this->longitude) {
+            return $this->latitude . ',' . $this->longitude;
+        }
+        return null;
+    }
+
+    /**
      * Check if user is admin
      */
     public function isAdmin(): bool
     {
-        return $this->is_admin;
+        return $this->is_admin === 1;
+    }
+
+    /**
+     * Check if user is installer/technician
+     */
+    public function isInstaller(): bool
+    {
+        return $this->is_admin === 2;
+    }
+
+    /**
+     * Check if user is client
+     */
+    public function isClient(): bool
+    {
+        return $this->is_admin === 0;
     }
 
     /**
@@ -94,6 +121,16 @@ class User extends Authenticatable
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function jobOrders()
+    {
+        return $this->hasMany(JobOrder::class, 'assigned_to');
+    }
+
+    public function clientJobOrders()
+    {
+        return $this->hasMany(JobOrder::class, 'client_id');
     }
 }
 

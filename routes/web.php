@@ -8,6 +8,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MikrotikController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\InstallerController;
 
 Route::get('/', [LandingController::class, 'index']);
 
@@ -33,15 +34,23 @@ Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']
 
 // Dashboard routes
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
-Route::get('/admin/sales', [DashboardController::class, 'sales'])->name('admin.sales');
-Route::post('/admin/sales/store', [DashboardController::class, 'storeSale'])->name('admin.sales.store');
-Route::post('/admin/sales/{sale}/delete', [DashboardController::class, 'deleteSale'])->name('admin.sales.delete');
-Route::post('/admin/expenses/store', [DashboardController::class, 'storeExpense'])->name('admin.expenses.store');
-Route::post('/admin/expenses/{expense}/delete', [DashboardController::class, 'deleteExpense'])->name('admin.expenses.delete');
+Route::middleware('admin')->group(function () {
+    Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+    Route::get('/admin/sales', [DashboardController::class, 'sales'])->name('admin.sales');
+    Route::post('/admin/sales/store', [DashboardController::class, 'storeSale'])->name('admin.sales.store');
+    Route::post('/admin/sales/{sale}/delete', [DashboardController::class, 'deleteSale'])->name('admin.sales.delete');
+    Route::post('/admin/expenses/store', [DashboardController::class, 'storeExpense'])->name('admin.expenses.store');
+    Route::post('/admin/expenses/{expense}/delete', [DashboardController::class, 'deleteExpense'])->name('admin.expenses.delete');
+});
 
 // Landing page admin edit
 Route::middleware('auth')->group(function () {
+    Route::get('/profile/edit', [DashboardController::class, 'editProfile'])->name('profile.edit');
+    Route::post('/profile/update', [DashboardController::class, 'updateProfile'])->name('profile.update');
+});
+
+// Admin routes
+Route::middleware('admin')->group(function () {
     Route::get('/admin/mikrotik', [MikrotikController::class, 'index'])->name('admin.mikrotik');
     Route::get('/admin/mikrotik/create', [MikrotikController::class, 'create'])->name('admin.mikrotik.create');
     Route::post('/admin/mikrotik', [MikrotikController::class, 'store'])->name('admin.mikrotik.store');
@@ -75,6 +84,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/plans/{plan}/delete', [PlanController::class, 'destroy'])->name('admin.plans.delete');
     Route::get('/admin/landing', [LandingController::class, 'edit'])->name('admin.landing');
     Route::post('/admin/landing/update', [LandingController::class, 'update'])->name('admin.landing.update');
-    Route::get('/profile/edit', [DashboardController::class, 'editProfile'])->name('profile.edit');
-    Route::post('/profile/update', [DashboardController::class, 'updateProfile'])->name('profile.update');
+    
+    // Installer management
+    Route::get('/admin/installers', [InstallerController::class, 'index'])->name('admin.installers');
+    Route::post('/admin/installers/store', [InstallerController::class, 'store'])->name('admin.installers.store');
+    Route::get('/admin/installers/{installer}/edit', [InstallerController::class, 'edit'])->name('admin.installers.edit');
+    Route::post('/admin/installers/{installer}/update', [InstallerController::class, 'update'])->name('admin.installers.update');
+    Route::post('/admin/installers/{installer}/delete', [InstallerController::class, 'destroy'])->name('admin.installers.delete');
+    
+    // Job orders management
+    Route::get('/admin/job-orders', [InstallerController::class, 'jobOrders'])->name('admin.job-orders');
+    Route::post('/admin/job-orders/store', [InstallerController::class, 'storeJobOrder'])->name('admin.job-orders.store');
+    Route::post('/admin/job-orders/{jobOrder}/update', [InstallerController::class, 'updateJobOrder'])->name('admin.job-orders.update');
+    Route::post('/admin/job-orders/{jobOrder}/delete', [InstallerController::class, 'deleteJobOrder'])->name('admin.job-orders.delete');
+});
+
+// Installer routes
+Route::middleware('installer')->group(function () {
+    Route::get('/installer/dashboard', [InstallerController::class, 'installerDashboard'])->name('installer.dashboard');
+    Route::post('/installer/job-orders/{jobOrder}/update-status', [InstallerController::class, 'updateJobStatus'])->name('installer.job-orders.update-status');
+    Route::get('/installer/profile', [InstallerController::class, 'profile'])->name('installer.profile');
+    Route::post('/installer/profile/update', [InstallerController::class, 'updateProfile'])->name('installer.profile.update');
 });

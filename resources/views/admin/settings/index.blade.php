@@ -57,6 +57,21 @@
             </div>
 
             <div class="adm-form-group">
+                <label>ISP Logo (Login & Register Pages)</label>
+                <input type="file" name="isp_logo" accept="image/*"
+                       style="padding:10px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; background:rgba(255,255,255,0.04); color:#fff; width:100%; font-size:13px;">
+                <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:6px;">This logo will appear on login and register pages</div>
+                @error('isp_logo')<div class="adm-form-error">{{ $message }}</div>@enderror
+                @if($settings && $settings->isp_logo)
+                <div style="margin-top:12px; display:flex; align-items:center; gap:12px;">
+                    <img src="{{ asset('storage/' . $settings->isp_logo) }}" alt="ISP logo"
+                         style="width:50px; height:50px; border-radius:8px; object-fit:contain; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.02);">
+                    <span style="font-size:12px; color:rgba(255,255,255,0.5);">Current ISP logo</span>
+                </div>
+                @endif
+            </div>
+
+            <div class="adm-form-group">
                 <label>Favicon (Icon in Browser Tab)</label>
                 <input type="file" name="favicon" accept="image/*"
                        style="padding:10px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; background:rgba(255,255,255,0.04); color:#fff; width:100%; font-size:13px;">
@@ -112,14 +127,5 @@
         </form>
     </div>
 
-</div>
-
-<div class="adm-card" style="margin-top:20px;">
-    <h3 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.07);">
-        ℹ️ Profile Settings
-    </h3>
-    <p style="font-size:13px; color:rgba(255,255,255,0.7); margin:0;">
-        To edit your personal profile information (name, email, phone, profile picture), please visit your <a href="{{ route('profile.edit') }}" style="color:#ff6b6b; text-decoration:none; border-bottom:1px solid rgba(255,107,107,0.3);">Admin Profile</a> page.
-    </p>
 </div>
 @endsection

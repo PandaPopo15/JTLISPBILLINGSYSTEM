@@ -49,6 +49,8 @@ class AuthController extends Controller
             'age'           => $validated['age'] ?? null,
             'plan_interest' => $validated['plan_interest'],
             'password'      => Hash::make($validated['password']),
+            'pppoe_username' => $this->generateUniquePPPoEUsername(),
+            'pppoe_password' => Str::random(8),
             'is_admin'      => 0,
             'status'        => 'pending',
         ]);
@@ -135,5 +137,19 @@ class AuthController extends Controller
         $this->sendVerificationEmail($user);
 
         return back()->with('success', 'Verification email sent! Please check your inbox.');
+    }
+
+    private function generateUniquePPPoEUsername(): string
+    {
+        $prefix = 'client_';
+        $suffix = Str::random(8);
+        $username = $prefix . $suffix;
+
+        while (User::where('pppoe_username', $username)->exists()) {
+            $suffix = Str::random(8);
+            $username = $prefix . $suffix;
+        }
+
+        return $username;
     }
 }

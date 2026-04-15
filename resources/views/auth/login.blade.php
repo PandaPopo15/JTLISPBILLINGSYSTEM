@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ISP Billing</title>
+    @php
+        $settings = \App\Models\LandingSetting::first();
+    @endphp
+    @if($settings && $settings->favicon)
+    <link rel="icon" href="{{ asset('storage/' . $settings->favicon) }}" type="image/x-icon">
+    @endif
     <style>
         * {
             margin: 0;
@@ -42,6 +48,13 @@
             opacity: 0.1;
         }
 
+        /* Reduce particles on mobile */
+        @media (max-width: 768px) {
+            .particle:nth-child(n+4) {
+                display: none;
+            }
+        }
+
         .particle:nth-child(1) { width: 80px; height: 80px; left: 10%; top: 10%; animation-duration: 25s; animation-delay: 0s; }
         .particle:nth-child(2) { width: 100px; height: 100px; right: 5%; top: 30%; animation-duration: 30s; animation-delay: 5s; }
         .particle:nth-child(3) { width: 60px; height: 60px; left: 20%; bottom: 20%; animation-duration: 28s; animation-delay: 10s; }
@@ -67,6 +80,13 @@
             background-size: 40px 40px;
             z-index: 1;
             pointer-events: none;
+        }
+
+        /* Disable glow lines on mobile for performance */
+        @media (max-width: 768px) {
+            .glow-line {
+                display: none;
+            }
         }
 
         /* Glow lines */
@@ -118,6 +138,15 @@
             animation: borderGlow 3s ease-in-out infinite;
         }
 
+        /* Disable heavy animations on mobile */
+        @media (max-width: 768px) {
+            .login-container {
+                animation: none;
+                backdrop-filter: blur(5px);
+                padding: 32px 20px;
+            }
+        }
+
         @keyframes borderGlow {
             0%, 100% { 
                 box-shadow: 0 0 20px rgba(255, 0, 0, 0.2), 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 0, 0, 0.05);
@@ -132,6 +161,11 @@
         .login-header {
             text-align: center;
             margin-bottom: 40px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .login-header h1 {
@@ -363,6 +397,13 @@
             z-index: 2;
         }
 
+        /* Hide corner decorations on mobile */
+        @media (max-width: 768px) {
+            .corner-decoration {
+                display: none;
+            }
+        }
+
         .corner-tl {
             top: 0;
             left: 0;
@@ -426,7 +467,11 @@
 
     <div class="login-container">
         <div class="login-header">
-            <h1>ISP Billing</h1>
+            @if($settings && $settings->isp_logo)
+                <img src="{{ asset('storage/' . $settings->isp_logo) }}" alt="ISP Logo" style="max-width:100%;max-height:90px;object-fit:contain;">
+            @else
+                <h1>ISP Billing</h1>
+            @endif
             <p>Secure Access Portal</p>
         </div>
 

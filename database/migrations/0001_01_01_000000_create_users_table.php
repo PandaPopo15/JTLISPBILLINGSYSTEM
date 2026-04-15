@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('phone_number')->nullable();
             $table->text('address')->nullable();
             $table->integer('age')->nullable();
-            $table->tinyInteger('is_admin')->default(0)->comment('1 for admin, 0 for normal user');
+            $table->tinyInteger('is_admin')->default(0)->comment('0=client, 1=admin, 2=installer');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

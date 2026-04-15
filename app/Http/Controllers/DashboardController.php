@@ -293,17 +293,19 @@ class DashboardController extends Controller
         }
         $validated['username'] = $username;
 
-        $generatedPassword = \Illuminate\Support\Str::random(5);
+        $generatedLoginPassword = \Illuminate\Support\Str::random(8);
+        $generatedPPPoEPassword = \Illuminate\Support\Str::random(8);
         $generatedPPPoEUsername = $this->generateUniquePPPoEUsername();
 
-        $validated['password']          = $generatedPassword;
+        $validated['password']          = \Hash::make($generatedLoginPassword);
         $validated['pppoe_username']    = $generatedPPPoEUsername;
+        $validated['pppoe_password']    = $generatedPPPoEPassword;
         $validated['is_admin']          = false;
         $validated['status']            = 'pending';
         $validated['email_verified_at'] = null;
 
         User::create($validated);
-        return redirect()->route('admin.clients')->with('success', "Client created successfully. PPPoE Username: {$generatedPPPoEUsername}, Password: {$generatedPassword}");
+        return redirect()->route('admin.clients')->with('success', "Client created successfully. Login Password: {$generatedLoginPassword}, PPPoE Username: {$generatedPPPoEUsername}, PPPoE Password: {$generatedPPPoEPassword}");
     }
 
     private function generateUniquePPPoEUsername(): string
@@ -362,7 +364,17 @@ class DashboardController extends Controller
             'plan_interest' => 'nullable|string|max:255',
             'mikrotik_id'   => 'nullable|exists:mikrotiks,id',
             'pppoe_username'=> 'nullable|string|max:64|unique:users,pppoe_username,' . $client->id,
+            'pppoe_password'=> 'nullable|string|max:64',
+            'password'      => 'nullable|string|min:8|confirmed',
+            'installation_date' => 'nullable|date',
+            'due_date'          => 'nullable|date|after_or_equal:installation_date',
         ]);
+
+        if (!empty($validated['password'])) {
+            $validated['password'] = \Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
 
         $client->update($validated);
         return redirect()->route('admin.clients')->with('success', 'Client updated successfully.');
@@ -466,10 +478,10 @@ class DashboardController extends Controller
                     '=disabled' => 'no',
                 ])->read();
             } else {
-                // Create new PPPoE secret
+                // Create new PPPoE secret with pppoe_password
                 $api->query('/ppp/secret/add', [
                     '=name'     => $client->pppoe_username,
-                    '=password' => $client->username,
+                    '=password' => $client->pppoe_password,
                     '=service'  => 'pppoe',
                     '=profile'  => $client->plan_interest ?? 'default',
                     '=comment'  => $client->full_name,
@@ -514,7 +526,8 @@ class DashboardController extends Controller
             'dashboard_tagline' => 'nullable|string|max:500',
             'primary_color'     => 'nullable|string|max:7',
             'dashboard_logo'    => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'favicon'           => 'nullable|image|mimes:jpeg,png,jpg,gif,ico|max:512',
+            'isp_logo'          => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'favicon'           => 'nullable|mimes:jpeg,png,jpg,gif,ico,svg|max:512',
         ]);
 
         $settings = LandingSetting::first() ?? new LandingSetting();
@@ -524,6 +537,13 @@ class DashboardController extends Controller
                 \Storage::disk('public')->delete($settings->dashboard_logo);
             }
             $settings->dashboard_logo = $request->file('dashboard_logo')->store('dashboard', 'public');
+        }
+
+        if ($request->hasFile('isp_logo')) {
+            if ($settings->isp_logo) {
+                \Storage::disk('public')->delete($settings->isp_logo);
+            }
+            $settings->isp_logo = $request->file('isp_logo')->store('dashboard', 'public');
         }
 
         if ($request->hasFile('favicon')) {

@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $settings->isp_name }} - Internet Plans</title>
+    @if($settings->favicon)
+    <link rel="icon" href="{{ asset('storage/' . $settings->favicon) }}" type="image/x-icon">
+    @endif
     <style>
         * { box-sizing: border-box; }
         body {

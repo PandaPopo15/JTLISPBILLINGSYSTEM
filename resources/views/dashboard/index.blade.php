@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ISP Billing</title>
+    @php
+        $settings = \App\Models\LandingSetting::first();
+    @endphp
+    @if($settings && $settings->favicon)
+    <link rel="icon" href="{{ asset('storage/' . $settings->favicon) }}" type="image/x-icon">
+    @endif
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {

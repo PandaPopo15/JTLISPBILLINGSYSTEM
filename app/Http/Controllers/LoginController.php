@@ -50,6 +50,10 @@ class LoginController extends Controller
                 return redirect()->route('admin.dashboard')->with('welcome', $user->first_name);
             }
 
+            if ($user->isInstaller()) {
+                return redirect()->route('installer.dashboard')->with('welcome', $user->first_name);
+            }
+
             return redirect()->intended('/dashboard')->with('welcome', $user->first_name);
         }
 

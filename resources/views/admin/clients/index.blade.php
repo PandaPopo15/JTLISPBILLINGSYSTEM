@@ -118,7 +118,7 @@
                                     'age'       => $client->age ?? '—',
                                     'plan'      => $client->plan_interest ?? '—',
                                     'pppoe'     => $client->pppoe_username ?? null,
-                                    'password'  => $client->password ?? null,
+                                    'pppoe_password' => $client->pppoe_password ?? null,
                                     'mikrotik'  => $client->mikrotik?->name ?? '—',
                                     'status'    => $client->status,
                                     'verified'  => $client->email_verified_at?->format('M d, Y') ?? null,
@@ -282,8 +282,9 @@
                 <div style="background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.3);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;color:rgba(255,255,255,0.7);line-height:1.6;">
                     <strong style="color:#81c784;">ℹ️ Auto-Generated Credentials</strong><br>
                     • PPPoE Username will be auto-generated<br>
-                    • Password (5 characters) will be auto-generated<br>
-                    • Both will be shown after client creation
+                    • PPPoE Password (for MikroTik) will be auto-generated<br>
+                    • Login Password (for system access) will be auto-generated<br>
+                    • All credentials will be shown after client creation
                 </div>
 
                 {{-- Billing Dates --}}
@@ -348,7 +349,7 @@
         <div class="modal-body" id="view-modal-body"></div>
         <div class="modal-footer">
             <button class="btn-secondary" onclick="closeModal('view-client-modal')">Close</button>
-            <button class="btn-primary" id="edit-btn" onclick="switchToEditMode()">✏️ Edit</button>
+            <a href="" id="edit-btn-link" class="btn-primary" style="text-decoration:none;">✏️ Edit</a>
         </div>
     </div>
 </div>
@@ -576,7 +577,7 @@ let addMap = null, addMarker = null;
 function initAddMap() {
     if (addMap) { setTimeout(() => addMap.invalidateSize(), 100); return; }
     setTimeout(() => {
-        addMap = L.map('add-map').setView([9.7517, 122.4003], 15);
+        addMap = L.map('add-map').setView([9.668866, 122.460734], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:'© OpenStreetMap', maxZoom:19
         }).addTo(addMap);
@@ -608,7 +609,10 @@ function copyToClipboard(text) {
 
 // ── View Modal ──
 let viewMap = null, viewMarker = null;
+let currentClientId = null;
+
 function openViewModal(data) {
+    currentClientId = data.id;
     const statusMap = {
         active:   '<span class="badge badge-green">✓ Active</span>',
         pending:  '<span class="badge badge-yellow">🕐 Pending</span>',
@@ -623,7 +627,7 @@ function openViewModal(data) {
         ['Age',        data.age],
         ['Plan',       data.plan],
         ['PPPoE Username', data.pppoe ? `<span style="font-family:monospace;color:#81d4fa;">${data.pppoe}</span>` : '<span style="color:rgba(255,255,255,0.3);">Not set</span>'],
-        ['PPPoE Password', data.password ? `<span style="font-family:monospace;color:#81d4fa;letter-spacing:2px;">${data.password}</span>` : '<span style="color:rgba(255,255,255,0.3);">Not set</span>'],
+        ['PPPoE Password', data.pppoe_password ? `<span style="font-family:monospace;color:#81d4fa;letter-spacing:2px;">${data.pppoe_password}</span>` : '<span style="color:rgba(255,255,255,0.3);">Not set</span>'],
         ['MikroTik',   data.mikrotik],
         ['Status',     statusMap[data.status] || data.status],
         ['Installation Date', data.installation_date || '<span style="color:rgba(255,255,255,0.3);">Not set</span>'],
@@ -648,6 +652,7 @@ function openViewModal(data) {
     }
 
     document.getElementById('view-modal-body').innerHTML = html;
+    document.getElementById('edit-btn-link').href = `/admin/clients/${data.id}/edit`;
     openModal('view-client-modal');
 
     if (data.lat && data.lng) {
