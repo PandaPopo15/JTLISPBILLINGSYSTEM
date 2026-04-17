@@ -28,6 +28,32 @@
     @endif
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* ── LEAFLET FIX ── */
+        .leaflet-container {
+            background: #1a1a1a !important;
+            outline: 0 !important;
+            z-index: 1 !important;
+        }
+        .leaflet-pane,
+        .leaflet-tile,
+        .leaflet-marker-icon,
+        .leaflet-marker-shadow {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+        }
+        .leaflet-container .leaflet-pane {
+            z-index: 400 !important;
+        }
+        .leaflet-tile-pane {
+            z-index: 2 !important;
+        }
+        .leaflet-control-container {
+            position: absolute !important;
+            z-index: 1000 !important;
+        }
+        
         body {
             min-height: 100vh;
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
@@ -334,6 +360,7 @@
         .badge-green { background: rgba(76,175,80,0.15); color: #66bb6a; border: 1px solid rgba(76,175,80,0.25); }
         .badge-red { background: rgba(255,82,82,0.15); color: #ff6b6b; border: 1px solid rgba(255,82,82,0.25); }
         .badge-yellow { background: rgba(255,193,7,0.15); color: #ffd54f; border: 1px solid rgba(255,193,7,0.25); }
+        .badge-gray { background: rgba(158,158,158,0.15); color: #bdbdbd; border: 1px solid rgba(158,158,158,0.25); }
 
         /* ── KPI CARDS ── */
         .adm-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 28px; }
@@ -631,6 +658,11 @@
             <span class="nav-icon">🔌</span> MikroTik Routers
         </a>
 
+        <a href="{{ route('admin.napboxes') }}"
+           class="adm-nav-item {{ request()->routeIs('admin.napboxes*') ? 'active' : '' }}">
+            <span class="nav-icon">📦</span> NapBoxes
+        </a>
+
         <div class="adm-nav-label">Technician</div>
 
         <a href="{{ route('admin.installers') }}"
@@ -703,24 +735,58 @@
 </div>
 
 <script>
+    // Save and restore dropdown states
+    const saveDropdownState = () => {
+        const notifOpen = document.getElementById('adm-notif-dropdown').classList.contains('open');
+        const profileOpen = document.getElementById('adm-dropdown').classList.contains('open');
+        sessionStorage.setItem('notifDropdownOpen', notifOpen);
+        sessionStorage.setItem('profileDropdownOpen', profileOpen);
+    };
+
+    // Restore dropdown states on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        if (sessionStorage.getItem('notifDropdownOpen') === 'true') {
+            document.getElementById('adm-notif-dropdown').classList.add('open');
+        }
+        if (sessionStorage.getItem('profileDropdownOpen') === 'true') {
+            document.getElementById('adm-dropdown').classList.add('open');
+        }
+    });
+
     // Notification dropdown
     const notifBtn = document.getElementById('adm-notif-btn');
     const notifDropdown = document.getElementById('adm-notif-dropdown');
-    notifBtn.addEventListener('click', () => notifDropdown.classList.toggle('open'));
+    notifBtn.addEventListener('click', () => {
+        notifDropdown.classList.toggle('open');
+        saveDropdownState();
+    });
     document.addEventListener('click', e => {
         if (!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
             notifDropdown.classList.remove('open');
+            saveDropdownState();
         }
     });
 
     // Profile dropdown
     const profileBtn = document.getElementById('adm-profile-btn');
     const dropdown   = document.getElementById('adm-dropdown');
-    profileBtn.addEventListener('click', () => dropdown.classList.toggle('open'));
+    profileBtn.addEventListener('click', () => {
+        dropdown.classList.toggle('open');
+        saveDropdownState();
+    });
     document.addEventListener('click', e => {
         if (!profileBtn.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.classList.remove('open');
+            saveDropdownState();
         }
+    });
+
+    // Clear dropdown states when clicking navigation links
+    document.querySelectorAll('.adm-nav-item').forEach(link => {
+        link.addEventListener('click', () => {
+            sessionStorage.removeItem('notifDropdownOpen');
+            sessionStorage.removeItem('profileDropdownOpen');
+        });
     });
 
     // Sidebar toggle

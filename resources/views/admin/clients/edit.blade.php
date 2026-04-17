@@ -101,9 +101,9 @@
             <label>Plan / Subscription</label>
             <select name="plan_interest">
                 <option value="">— None —</option>
-                @foreach(\App\Models\LandingSetting::first()?->plans ?? [] as $plan)
-                <option value="{{ $plan['name'] }}" {{ old('plan_interest', $client->plan_interest) === $plan['name'] ? 'selected' : '' }}>
-                    {{ $plan['name'] }} — ₱{{ $plan['price'] }}/mo
+                @foreach($plans as $plan)
+                <option value="{{ $plan->name }}" {{ old('plan_interest', $client->plan_interest) === $plan->name ? 'selected' : '' }}>
+                    {{ $plan->name }} — ₱{{ number_format($plan->price, 2) }}/mo
                 </option>
                 @endforeach
             </select>

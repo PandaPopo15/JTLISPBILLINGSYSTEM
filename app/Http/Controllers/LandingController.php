@@ -45,11 +45,11 @@ class LandingController extends Controller
         if (!Auth::check() || !Auth::user()->isAdmin()) abort(403);
 
         $validated = $request->validate([
-            'isp_name'    => ['required', 'string', 'max:255'],
-            'theme_color' => ['required', 'string', 'max:7'],
-            'headline'    => ['required', 'string'],
-            'subheadline' => ['required', 'string'],
-            'logo'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'isp_name'        => ['required', 'string', 'max:255'],
+            'theme_color'     => ['required', 'string', 'max:7'],
+            'headline'        => ['required', 'string'],
+            'subheadline'     => ['required', 'string'],
+            'logo'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
 
         $settings = LandingSetting::first() ?? new LandingSetting();
@@ -61,10 +61,10 @@ class LandingController extends Controller
             $settings->logo_path = $request->file('logo')->store('landing_logo', 'public');
         }
 
-        $settings->isp_name    = $validated['isp_name'];
-        $settings->theme_color = $validated['theme_color'];
-        $settings->headline    = $validated['headline'];
-        $settings->subheadline = $validated['subheadline'];
+        $settings->isp_name        = $validated['isp_name'];
+        $settings->theme_color     = $validated['theme_color'];
+        $settings->headline        = $validated['headline'];
+        $settings->subheadline     = $validated['subheadline'];
         $settings->save();
 
         return redirect()->back()->with('success', 'Landing page settings updated successfully.');

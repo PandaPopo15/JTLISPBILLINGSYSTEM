@@ -130,9 +130,23 @@
 
         /* Map */
         #map {
-            width: 100%; height: 260px; border-radius: 12px;
+            width: 100% !important; 
+            height: 260px !important; 
+            border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1);
-            margin-top: 8px; z-index: 1;
+            margin-top: 8px; 
+            z-index: 1; 
+            position: relative !important;
+            overflow: hidden !important;
+            display: block !important;
+        }
+        #map .leaflet-container {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 1 !important;
         }
         .map-hint {
             font-size: 11px; color: rgba(255,255,255,0.35);
@@ -345,33 +359,51 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Init map centered on Brgy. Nabulao, Sipalay City, Negros Occidental
-    const map = L.map('map').setView([9.668866, 122.460734], 15);
+    // Init map centered on Nabulao, Sipalay
+    function initRegisterMap() {
+        const container = document.getElementById('map');
+        if (!container) return;
+        
+        const map = L.map('map', {
+            preferCanvas: false,
+            zoomControl: true,
+            attributionControl: true
+        }).setView([9.7489, 122.4042], 15);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19,
-    }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19,
+            crossOrigin: true
+        }).addTo(map);
 
-    let marker = null;
-    const latInput = document.getElementById('lat-input');
-    const lngInput = document.getElementById('lng-input');
+        map.invalidateSize(true);
 
-    // Restore pin if old values exist
-    const oldLat = {{ old('latitude') ? old('latitude') : 'null' }};
-    const oldLng = {{ old('longitude') ? old('longitude') : 'null' }};
-    if (oldLat && oldLng) {
-        marker = L.marker([oldLat, oldLng]).addTo(map);
-        map.setView([oldLat, oldLng], 15);
+        let marker = null;
+        const latInput = document.getElementById('lat-input');
+        const lngInput = document.getElementById('lng-input');
+
+        // Restore pin if old values exist
+        const oldLat = {{ old('latitude') ? old('latitude') : 'null' }};
+        const oldLng = {{ old('longitude') ? old('longitude') : 'null' }};
+        if (oldLat && oldLng) {
+            marker = L.marker([oldLat, oldLng]).addTo(map);
+            map.setView([oldLat, oldLng], 15);
+        }
+
+        map.on('click', function(e) {
+            const { lat, lng } = e.latlng;
+            latInput.value = lat.toFixed(7);
+            lngInput.value = lng.toFixed(7);
+            if (marker) marker.setLatLng(e.latlng);
+            else marker = L.marker(e.latlng).addTo(map);
+        });
     }
 
-    map.on('click', function(e) {
-        const { lat, lng } = e.latlng;
-        latInput.value = lat.toFixed(7);
-        lngInput.value = lng.toFixed(7);
-        if (marker) marker.setLatLng(e.latlng);
-        else marker = L.marker(e.latlng).addTo(map);
-    });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRegisterMap);
+    } else {
+        initRegisterMap();
+    }
 
     // Auto-dismiss toast
     const toast = document.querySelector('.toast');

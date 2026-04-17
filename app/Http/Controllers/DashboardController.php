@@ -343,7 +343,8 @@ class DashboardController extends Controller
     {
         if (!Auth::check() || !Auth::user()->isAdmin()) abort(403);
         $mikrotiks = Mikrotik::where('is_active', true)->orderBy('name')->get();
-        return view('admin.clients.edit', compact('client', 'mikrotiks'));
+        $plans = \App\Models\Plan::orderBy('name')->get();
+        return view('admin.clients.edit', compact('client', 'mikrotiks', 'plans'));
     }
 
     public function updateClient(Request $request, User $client)

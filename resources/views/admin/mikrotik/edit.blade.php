@@ -1,22 +1,93 @@
 @extends('admin.layout')
 @section('title', 'Edit MikroTik Router')
 
+@push('styles')
+<style>
+    .mikrotik-edit-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+    
+    .mikrotik-edit-grid > .adm-card {
+        margin-bottom: 0;
+    }
+    
+    .mikrotik-right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    @media (max-width: 1024px) {
+        .mikrotik-edit-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        .mikrotik-right-column {
+            gap: 24px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .mikrotik-edit-grid {
+            gap: 20px;
+        }
+        
+        .mikrotik-right-column {
+            gap: 20px;
+        }
+        
+        .adm-form-actions {
+            flex-direction: column;
+        }
+        
+        .adm-form-actions button {
+            width: 100%;
+            margin-left: 0 !important;
+        }
+        
+        .napbox-list label,
+        .client-list label {
+            padding: 14px 12px !important;
+        }
+        
+        .napbox-list input[type="radio"],
+        .client-list input[type="checkbox"] {
+            width: 20px !important;
+            height: 20px !important;
+        }
+        
+        #client-search {
+            font-size: 16px !important;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="adm-page-header">
     <div>
         <div class="adm-page-title">✏️ {{ $mikrotik->name }}</div>
-        <div class="adm-page-subtitle">Edit router settings and manage assigned clients.</div>
+        <div class="adm-page-subtitle">Edit router settings, test connection, and manage NapBoxes.</div>
     </div>
-    <div style="display:flex; gap:10px;">
-        <button class="btn-success" id="test-btn" onclick="testRouter()">⚡ Test Connection</button>
-        <a href="{{ route('admin.mikrotik') }}" class="btn-secondary">← Back</a>
+    <a href="{{ route('admin.mikrotik') }}" class="btn-secondary">← Back</a>
+</div>
+
+{{-- Test Connection Modal --}}
+<div id="test-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:rgba(18,18,18,0.98); border:1px solid rgba(255,255,255,0.1); border-radius:18px; padding:32px; max-width:480px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+        <div id="test-modal-content" style="text-align:center;">
+            <div id="test-modal-icon" style="font-size:64px; margin-bottom:16px;">⏳</div>
+            <div id="test-modal-title" style="font-size:20px; font-weight:700; color:#fff; margin-bottom:8px;">Testing Connection...</div>
+            <div id="test-modal-message" style="font-size:14px; color:rgba(255,255,255,0.6); line-height:1.6;">Connecting to {{ $mikrotik->ip_address }}:8728</div>
+        </div>
     </div>
 </div>
 
-{{-- Test result --}}
-<div id="test-result" style="display:none; margin-bottom:20px; padding:14px 18px; border-radius:12px; font-size:14px;"></div>
-
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+<div class="mikrotik-edit-grid">
 
     {{-- Router Settings --}}
     <div class="adm-card">
@@ -37,48 +108,38 @@
                     <input type="text" name="name" value="{{ old('name', $mikrotik->name) }}" required>
                 </div>
                 <div class="adm-form-group">
-                    <label>Location</label>
-                    <input type="text" name="location" value="{{ old('location', $mikrotik->location) }}">
-                </div>
-            </div>
-
-            <div class="adm-form-row">
-                <div class="adm-form-group">
-                    <label>ZeroTier Network ID</label>
-                    <input type="text" name="zerotier_network_id" value="{{ old('zerotier_network_id', $mikrotik->zerotier_network_id) }}"
-                           style="font-family:monospace;" maxlength="16">
-                </div>
-                <div class="adm-form-group">
-                    <label>ZeroTier IP *</label>
+                    <label>ZeroTier IP Address *</label>
                     <input type="text" name="ip_address" value="{{ old('ip_address', $mikrotik->ip_address) }}"
                            style="font-family:monospace;" required>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:4px;">
+                        Use ZeroTier IP or any IP that can reach the MikroTik API
+                    </div>
                 </div>
             </div>
 
-            <div class="adm-form-row">
-                <div class="adm-form-group">
-                    <label>API Port *</label>
-                    <input type="number" name="port" value="{{ old('port', $mikrotik->port) }}" required>
-                </div>
-                <div class="adm-form-group">
-                    <label>Status</label>
-                    <select name="is_active">
-                        <option value="1" {{ old('is_active', $mikrotik->is_active ? '1' : '0') == '1' ? 'selected' : '' }}>Active</option>
-                        <option value="0" {{ old('is_active', $mikrotik->is_active ? '1' : '0') == '0' ? 'selected' : '' }}>Inactive</option>
-                    </select>
+            <div class="adm-form-group">
+                <label>Deployment Location (Area Identifier)</label>
+                <input type="text" name="location" value="{{ old('location', $mikrotik->location) }}">
+                <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:4px;">
+                    Optional identifier for where this router is physically deployed
                 </div>
             </div>
 
+            <h3 style="font-size:14px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin:20px 0 16px;">Connection & Credentials</h3>
+
             <div class="adm-form-row">
                 <div class="adm-form-group">
-                    <label>API Username *</label>
+                    <label>MikroTik Username *</label>
                     <input type="text" name="username" value="{{ old('username', $mikrotik->username) }}" required>
                 </div>
                 <div class="adm-form-group">
-                    <label>API Password</label>
+                    <label>MikroTik Password</label>
                     <input type="password" name="password" placeholder="Leave blank to keep current" autocomplete="new-password">
                 </div>
             </div>
+
+            <input type="hidden" name="port" value="{{ $mikrotik->port }}">
+            <input type="hidden" name="is_active" value="1">
 
             <div class="adm-form-group">
                 <label>Notes</label>
@@ -86,13 +147,73 @@
             </div>
 
             <div class="adm-form-actions">
-                <button type="submit" class="btn-primary">💾 Update Router</button>
+                <button type="button" class="btn-success" onclick="testRouter()">⚡ Test Connection</button>
+                <button type="submit" class="btn-primary" style="margin-left:auto;">💾 Update Router</button>
             </div>
         </form>
     </div>
 
-    {{-- Assign Clients --}}
-    <div class="adm-card">
+    <div class="mikrotik-right-column">
+        {{-- Assign NapBoxes --}}
+        <div class="adm-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+            <h3 style="font-size:14px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px;">
+                Assign NapBoxes
+            </h3>
+            <span class="badge badge-yellow">{{ $mikrotik->napboxes->count() }} assigned</span>
+        </div>
+
+        <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:16px; line-height:1.6;">
+            Select NapBoxes that are connected to this MikroTik router. These will appear in the location served.
+        </p>
+
+        <form action="{{ route('admin.mikrotik.assign-napboxes', $mikrotik) }}" method="POST">
+            @csrf
+
+            <div style="max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:4px;" class="napbox-list">
+                @php
+                    $napboxes = \App\Models\Napbox::orderBy('location')->orderBy('name')->get();
+                @endphp
+                @forelse($napboxes as $napbox)
+                <label style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px;
+                              border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.03);
+                              cursor:pointer; transition:background 0.15s;"
+                       onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+                       onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                    <input type="radio" name="napbox_{{ $napbox->id }}" value="1"
+                           {{ $napbox->mikrotik_id == $mikrotik->id ? 'checked' : '' }}
+                           style="width:16px; height:16px; accent-color:#ff5252; flex-shrink:0;">
+                    <div style="min-width:0;">
+                        <div style="font-size:13px; font-weight:600; color:#fff;">
+                            {{ $napbox->name }}
+                        </div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:1px;">
+                            📍 {{ $napbox->location }}
+                        </div>
+                    </div>
+                    @if($napbox->mikrotik_id == $mikrotik->id)
+                    <span class="badge badge-green" style="margin-left:auto; flex-shrink:0; font-size:10px;">Assigned</span>
+                    @elseif($napbox->mikrotik_id)
+                    <span class="badge badge-yellow" style="margin-left:auto; flex-shrink:0; font-size:10px;">Other Router</span>
+                    @endif
+                </label>
+                @empty
+                <div style="text-align:center; padding:24px; color:rgba(255,255,255,0.3); font-size:13px;">
+                    No NapBoxes available. <a href="#" style="color:#81d4fa;">Create one first</a>.
+                </div>
+                @endforelse
+            </div>
+
+            @if($napboxes->isNotEmpty())
+            <div style="display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">
+                <button type="submit" class="btn-primary btn-sm" style="margin-left:auto;">💾 Save NapBoxes</button>
+            </div>
+            @endif
+        </form>
+        </div>
+
+        {{-- Assign Clients --}}
+        <div class="adm-card">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
             <h3 style="font-size:14px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px;">
                 Assign Clients
@@ -115,7 +236,7 @@
 
             <div id="client-list"
                  style="max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;
-                        padding-right:4px;">
+                        padding-right:4px;" class="client-list">
                 @forelse($clients as $client)
                 <label id="cl-{{ $client->id }}"
                        style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px;
@@ -155,6 +276,7 @@
             </div>
             @endif
         </form>
+        </div>
     </div>
 
 </div>
@@ -162,43 +284,66 @@
 
 @push('scripts')
 <script>
+let testModalTimeout;
+
 async function testRouter() {
-    const btn = document.getElementById('test-btn');
-    const el  = document.getElementById('test-result');
-    btn.disabled    = true;
-    btn.textContent = '⏳ Testing...';
-    el.style.display    = 'block';
-    el.style.background = 'rgba(255,255,255,0.04)';
-    el.style.border     = '1px solid rgba(255,255,255,0.08)';
-    el.style.color      = 'rgba(255,255,255,0.6)';
-    el.textContent      = 'Connecting to {{ $mikrotik->ip_address }}:{{ $mikrotik->port }}...';
+    const modal = document.getElementById('test-modal');
+    const icon = document.getElementById('test-modal-icon');
+    const title = document.getElementById('test-modal-title');
+    const message = document.getElementById('test-modal-message');
+    
+    // Clear any existing timeout
+    if (testModalTimeout) clearTimeout(testModalTimeout);
+    
+    // Show modal with loading state
+    modal.style.display = 'flex';
+    icon.textContent = '⏳';
+    title.textContent = 'Testing Connection...';
+    title.style.color = '#fff';
+    message.textContent = 'Connecting to {{ $mikrotik->ip_address }}:8728';
+    message.style.color = 'rgba(255,255,255,0.6)';
 
     try {
-        const res  = await fetch('{{ route("admin.mikrotik.test", $mikrotik) }}', {
+        const res = await fetch('{{ route("admin.mikrotik.test", $mikrotik) }}', {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
         });
         const data = await res.json();
+        
         if (data.success) {
-            el.style.background = 'rgba(76,175,80,0.1)';
-            el.style.border     = '1px solid rgba(76,175,80,0.3)';
-            el.style.color      = '#66bb6a';
-            el.textContent      = '✅ ' + data.message;
+            icon.textContent = '✅';
+            title.textContent = 'Connection Successful!';
+            title.style.color = '#66bb6a';
+            message.textContent = data.message;
+            message.style.color = 'rgba(102,187,106,0.8)';
         } else {
-            el.style.background = 'rgba(255,82,82,0.1)';
-            el.style.border     = '1px solid rgba(255,82,82,0.3)';
-            el.style.color      = '#ff6b6b';
-            el.textContent      = '❌ ' + data.message;
+            icon.textContent = '❌';
+            title.textContent = 'Connection Failed';
+            title.style.color = '#ff6b6b';
+            message.textContent = data.message;
+            message.style.color = 'rgba(255,107,107,0.8)';
         }
     } catch(e) {
-        el.style.background = 'rgba(255,82,82,0.1)';
-        el.style.border     = '1px solid rgba(255,82,82,0.3)';
-        el.style.color      = '#ff6b6b';
-        el.textContent      = '❌ Request failed: ' + e.message;
+        icon.textContent = '❌';
+        title.textContent = 'Connection Failed';
+        title.style.color = '#ff6b6b';
+        message.textContent = 'Request failed: ' + e.message;
+        message.style.color = 'rgba(255,107,107,0.8)';
     }
-    btn.disabled    = false;
-    btn.textContent = '⚡ Test Connection';
+    
+    // Auto-close after 4.5 seconds
+    testModalTimeout = setTimeout(() => {
+        modal.style.display = 'none';
+    }, 4500);
 }
+
+// Close modal on click outside
+document.getElementById('test-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'test-modal') {
+        if (testModalTimeout) clearTimeout(testModalTimeout);
+        e.target.style.display = 'none';
+    }
+});
 
 function filterClients(q) {
     q = q.toLowerCase();

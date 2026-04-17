@@ -162,8 +162,8 @@
 </div>
 
 {{-- Due Client View Modal --}}
-<div id="due-client-modal" style="display:none;position:fixed;inset:0;z-index:2000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);">
-    <div id="due-modal-container" style="border-radius:20px;width:100%;max-width:500px;box-shadow:0 24px 80px rgba(0,0,0,0.6);">
+<div id="due-client-modal" style="display:none;position:fixed;inset:0;z-index:2000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);pointer-events:none;">
+    <div id="due-modal-container" style="border-radius:20px;width:100%;max-width:500px;box-shadow:0 24px 80px rgba(0,0,0,0.6);pointer-events:auto;">
         <div id="due-modal-header" style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px 14px;">
             <div id="due-modal-title" style="font-size:16px;font-weight:700;">📅 Payment Details</div>
             <button id="due-modal-close-btn" onclick="closeDueModal()" style="width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">✕</button>
@@ -272,12 +272,16 @@ body.light-mode #due-modal-body .vvalue {
             document.getElementById('mark-paid-form').action = `/admin/clients/${data.id}/mark-paid`;
         }
         
-        document.getElementById('due-client-modal').style.display = 'flex';
+        const modal = document.getElementById('due-client-modal');
+        modal.style.display = 'flex';
+        modal.style.pointerEvents = 'auto';
         document.body.style.overflow = 'hidden';
     }
 
     function closeDueModal() {
-        document.getElementById('due-client-modal').style.display = 'none';
+        const modal = document.getElementById('due-client-modal');
+        modal.style.display = 'none';
+        modal.style.pointerEvents = 'none';
         document.body.style.overflow = '';
     }
 

@@ -109,12 +109,12 @@ class MikrotikController extends Controller
         if (!$socket) {
             return response()->json([
                 'success' => false,
-                'message' => "Cannot reach {$ip}:{$port} — {$errstr}. Check ZeroTier is active and MikroTik API is enabled.",
+                'message' => "Cannot reach {$ip}:{$port} — {$errstr}. Check ZeroTier connection and MikroTik API service.",
             ]);
         }
         fclose($socket);
 
-        // RouterOS API login (requires routeros/api package)
+        // RouterOS API login
         try {
             $client = new \RouterOS\Client([
                 'host' => $ip,
@@ -122,19 +122,31 @@ class MikrotikController extends Controller
                 'pass' => $mikrotik->password,
                 'port' => $port,
             ]);
-            $result   = $client->query('/system/identity/print')->read();
-            $identity = $result[0]['name'] ?? 'Unknown';
+            
+            $query = new \RouterOS\Query('/system/identity/print');
+            $response = $client->query($query)->read();
+            $identity = $response[0]['name'] ?? 'Unknown';
 
             $mikrotik->update(['last_connected_at' => now()]);
 
             return response()->json([
                 'success' => true,
-                'message' => "Connected — Router identity: {$identity}",
+                'message' => "Connected successfully! Router identity: {$identity}",
+            ]);
+        } catch (\RouterOS\Exceptions\ClientException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => "Authentication failed. Check username and password.",
+            ]);
+        } catch (\RouterOS\Exceptions\ConnectException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => "Connection error: " . $e->getMessage(),
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => "Port reachable but API login failed: " . $e->getMessage(),
+                'message' => "API error: " . $e->getMessage(),
             ]);
         }
     }
@@ -160,5 +172,30 @@ class MikrotikController extends Controller
 
         return redirect()->route('admin.mikrotik.edit', $mikrotik)
                          ->with('success', 'Clients assigned successfully.');
+    }
+
+    public function assignNapboxes(Request $request, Mikrotik $mikrotik)
+    {
+        $this->guard();
+
+        // Get all napbox IDs from the request (radio buttons with napbox_{id})
+        $napboxIds = [];
+        foreach ($request->all() as $key => $value) {
+            if (str_starts_with($key, 'napbox_') && $value == '1') {
+                $napboxIds[] = str_replace('napbox_', '', $key);
+            }
+        }
+
+        // Remove this mikrotik from all previously assigned napboxes
+        \App\Models\Napbox::where('mikrotik_id', $mikrotik->id)->update(['mikrotik_id' => null]);
+
+        // Assign selected napboxes
+        if (!empty($napboxIds)) {
+            \App\Models\Napbox::whereIn('id', $napboxIds)
+                ->update(['mikrotik_id' => $mikrotik->id]);
+        }
+
+        return redirect()->route('admin.mikrotik.edit', $mikrotik)
+                         ->with('success', 'NapBoxes assigned successfully.');
     }
 }

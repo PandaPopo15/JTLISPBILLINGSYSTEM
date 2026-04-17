@@ -34,6 +34,11 @@ class Mikrotik extends Model
         return $this->hasMany(User::class, 'mikrotik_id');
     }
 
+    public function napboxes()
+    {
+        return $this->hasMany(Napbox::class);
+    }
+
     public function getClientCountAttribute(): int
     {
         return $this->clients()->count();

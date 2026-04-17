@@ -308,7 +308,7 @@
                 </div>
                 <div class="adm-form-group">
                     <label>📍 Pin Location on Map</label>
-                    <div id="add-map" style="height:220px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);margin-top:4px;"></div>
+                    <div id="add-map" style="height:220px;width:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.1);margin-top:4px;position:relative;"></div>
                     <div style="font-size:11px;color:rgba(255,255,255,0.3);text-align:center;margin-top:5px;">Click map to drop pin</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
                         <div class="adm-form-group" style="margin-bottom:0;">
@@ -504,6 +504,45 @@
 .copy-btn{background:rgba(129,212,250,0.12);color:#81d4fa;border:1px solid rgba(129,212,250,0.3);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;transition:all 0.2s;}
 .copy-btn:hover{background:rgba(129,212,250,0.25);border-color:rgba(129,212,250,0.6);}
 
+#add-map {
+    height: 220px !important;
+    width: 100% !important;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-top: 4px;
+    position: relative !important;
+    z-index: 1 !important;
+    overflow: hidden !important;
+    display: block !important;
+}
+#add-map .leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1 !important;
+}
+
+#view-map {
+    height: 200px !important;
+    width: 100% !important;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative !important;
+    z-index: 1 !important;
+    overflow: hidden !important;
+    display: block !important;
+}
+#view-map .leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1 !important;
+}
+
 /* Light mode styles for modals */
 body.light-mode .modal-backdrop {
     background: rgba(0,0,0,0.3);
@@ -575,27 +614,36 @@ document.addEventListener('keydown', e => {
 // ── Add Client Map ──
 let addMap = null, addMarker = null;
 function initAddMap() {
-    if (addMap) { setTimeout(() => addMap.invalidateSize(), 100); return; }
-    setTimeout(() => {
-        addMap = L.map('add-map').setView([9.668866, 122.460734], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution:'© OpenStreetMap', maxZoom:19
-        }).addTo(addMap);
+    const container = document.getElementById('add-map');
+    if (!container || addMap) return;
+    
+    addMap = L.map('add-map', {
+        preferCanvas: false,
+        zoomControl: true,
+        attributionControl: true
+    }).setView([9.7489, 122.4042], 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19,
+        crossOrigin: true
+    }).addTo(addMap);
 
-        const oldLat = document.getElementById('add-lat').value;
-        const oldLng = document.getElementById('add-lng').value;
-        if (oldLat && oldLng) {
-            addMarker = L.marker([parseFloat(oldLat), parseFloat(oldLng)]).addTo(addMap);
-            addMap.setView([parseFloat(oldLat), parseFloat(oldLng)], 15);
-        }
+    addMap.invalidateSize(true);
 
-        addMap.on('click', e => {
-            document.getElementById('add-lat').value = e.latlng.lat.toFixed(7);
-            document.getElementById('add-lng').value = e.latlng.lng.toFixed(7);
-            if (addMarker) addMarker.setLatLng(e.latlng);
-            else addMarker = L.marker(e.latlng).addTo(addMap);
-        });
-    }, 150);
+    const oldLat = document.getElementById('add-lat').value;
+    const oldLng = document.getElementById('add-lng').value;
+    if (oldLat && oldLng) {
+        addMarker = L.marker([parseFloat(oldLat), parseFloat(oldLng)]).addTo(addMap);
+        addMap.setView([parseFloat(oldLat), parseFloat(oldLng)], 15);
+    }
+
+    addMap.on('click', e => {
+        document.getElementById('add-lat').value = e.latlng.lat.toFixed(7);
+        document.getElementById('add-lng').value = e.latlng.lng.toFixed(7);
+        if (addMarker) addMarker.setLatLng(e.latlng);
+        else addMarker = L.marker(e.latlng).addTo(addMap);
+    });
 }
 
 // ── Copy to Clipboard ──
@@ -647,7 +695,7 @@ function openViewModal(data) {
     if (data.lat && data.lng) {
         html += `<div style="margin-top:12px;">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.7px;color:rgba(255,255,255,0.38);margin-bottom:8px;">📍 Location</div>
-            <div id="view-map" style="height:200px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);"></div>
+            <div id="view-map" style="height:200px;width:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.1);position:relative;"></div>
         </div>`;
     }
 
@@ -657,16 +705,29 @@ function openViewModal(data) {
 
     if (data.lat && data.lng) {
         setTimeout(() => {
+            const container = document.getElementById('view-map');
+            if (!container) return;
+            
             if (viewMap) { viewMap.remove(); viewMap = null; }
-            viewMap = L.map('view-map').setView([data.lat, data.lng], 15);
+            viewMap = L.map('view-map', {
+                preferCanvas: false,
+                zoomControl: true,
+                attributionControl: true
+            }).setView([data.lat, data.lng], 15);
+            
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution:'© OpenStreetMap', maxZoom:19
+                attribution: '© OpenStreetMap',
+                maxZoom: 19,
+                crossOrigin: true
             }).addTo(viewMap);
+            
+            viewMap.invalidateSize(true);
+            
             L.marker([data.lat, data.lng])
              .bindPopup(`<b>${data.name}</b><br>${data.address}`)
              .addTo(viewMap)
              .openPopup();
-        }, 150);
+        }, 50);
     }
 }
 </script>
